@@ -62,7 +62,7 @@ jobs:
 
       - name: Build and push
         if: ${{ steps.changed-files.outputs.all_modified_files }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile/${{ matrix.name }}/Dockerfile
