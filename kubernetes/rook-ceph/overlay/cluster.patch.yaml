@@ -1,0 +1,17 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+spec:
+  storage: # cluster level storage configuration and selection
+    useAllNodes: false
+    useAllDevices: false
+    nodes:
+      - name: raspberrypi4-4g
+        devices:
+          - name: /dev/disk/by-partuuid/c4529bd0-fcc6-47eb-82cf-37ea0883ee16
+      - name: raspberrypi5-4g
+        devices:
+          - name: /dev/disk/by-partuuid/5b15ac5e-ef21-4619-a624-b74e7bcd12b2
+  monitoring:
+    metricsDisabled: true
