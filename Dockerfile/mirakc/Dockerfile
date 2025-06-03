@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
 	apk add autoconf automake bash clang cmake curl make pkgconfig linux-headers
 
 # additional pcsc tool
-COPY --from=pcsc-tool-image /build /
+COPY --from=pcsc-tool-image / /
 
 # libaribb25
 WORKDIR /tmp/libaribb25
