@@ -42,7 +42,7 @@ jobs:
 
       - name: Set up Docker Buildx
         if: ${{ steps.changed-files.outputs.all_modified_files }}
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to the Container registry
         if: ${{ steps.changed-files.outputs.all_modified_files }}
