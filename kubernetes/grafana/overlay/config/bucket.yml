@@ -1,0 +1,7 @@
+type: s3
+config:
+  bucket: $(BUCKET_NAME)
+  endpoint: $(BUCKET_HOST)
+  access_key: $(AWS_ACCESS_KEY_ID)
+  secret_key: $(AWS_SECRET_ACCESS_KEY)
+  insecure: true

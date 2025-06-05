@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/name: mysqldump
+    app.kubernetes.io/part-of: grafana
+  name: mysqldump
+spec:
+  storageClassName: ds420plus-kagawa
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 64Mi

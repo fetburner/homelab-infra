@@ -1,0 +1,211 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: cloudflared
+    app.kubernetes.io/name: cloudflared
+    app.kubernetes.io/part-of: grafana
+  name: cloudflared
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflared
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cloudflared
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared
+          args:
+            - "tunnel"
+            - "run"
+          envFrom:
+            - secretRef:
+                name: tunnel-token
+          securityContext:
+            readOnlyRootFilesystem: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: grafana
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/part-of: grafana
+  name: grafana
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grafana
+    spec:
+      containers:
+        - image: grafana/grafana:9.3.16
+          name: grafana
+          ports:
+            - containerPort: 3000
+              name: grafana
+          volumeMounts:
+            - name: grafana
+              mountPath: /var/lib/grafana
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: grafana
+          emptyDir:
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: thanos-store-gateway
+    app.kubernetes.io/name: thanos-store-gateway
+    app.kubernetes.io/part-of: grafana
+  name: thanos-store-gateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thanos-store-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: thanos-store-gateway
+    spec:
+      containers:
+        - image: thanosio/thanos:v0.37.2
+          name: thanos-store-gataway
+          args:
+            - store
+            - --grpc-address=0.0.0.0:10091
+            - --data-dir=/tmp/thanos/store
+            - --ignore-deletion-marks-delay=24h
+            - --objstore.config-file=/etc/thanos/bucket.yml
+          ports:
+            - name: thanos-store
+              containerPort: 10091
+          volumeMounts:
+            - name: thanos-store
+              mountPath: /tmp/thanos/store
+            - name: thanos-bucket
+              mountPath: /etc/thanos
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: thanos-store
+          emptyDir:
+        - name: thanos-bucket
+          configMap:
+            name: bucket
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: thanos-querier
+    app.kubernetes.io/name: thanos-querier
+    app.kubernetes.io/part-of: grafana
+  name: thanos-querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thanos-querier
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: thanos-querier
+    spec:
+      containers:
+        - image: thanosio/thanos:v0.37.2
+          name: thanos-querier
+          args:
+            - query
+            - --query.replica-label=pod
+            - --query.auto-downsampling
+            - --http-address=0.0.0.0:10902
+            - --endpoint=thanos-sidecar:10091
+            - --endpoint=thanos-store-gateway:10091
+          ports:
+            - containerPort: 10902
+              name: thanos-querier
+          securityContext:
+            readOnlyRootFilesystem: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: thanos-compactor
+    app.kubernetes.io/name: thanos-compactor
+    app.kubernetes.io/part-of: grafana
+  name: thanos-compactor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thanos-compactor
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: thanos-compactor
+    spec:
+      containers:
+        - image: thanosio/thanos:v0.37.2
+          name: thanos-compactor
+          args:
+            - compact
+            - --data-dir=/tmp/thanos/store
+            - --objstore.config-file=/etc/thanos/bucket.yml
+            - --wait
+            - --retention.resolution-raw=7d
+            - --retention.resolution-5m=30d
+            - --retention.resolution-1h=365d
+          volumeMounts:
+            - name: thanos-store
+              mountPath: /tmp/thanos/store
+            - name: thanos-bucket
+              mountPath: /etc/thanos
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: thanos-store
+          emptyDir:
+        - name: thanos-bucket
+          configMap:
+            name: bucket
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: snmp-exporter
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/part-of: grafana
+  name: snmp-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: snmp-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: snmp-exporter
+    spec:
+      containers:
+        - image: prom/snmp-exporter:v0.22.0
+          name: snmp-exporter
+          ports:
+            - containerPort: 9116
+              name: snmp-exporter
+          volumeMounts:
+            - name: snmp-exporter-config
+              mountPath: /etc/snmp_exporter
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: snmp-exporter-config
+          configMap:
+            name: snmp-exporter-config

@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  template:
+    spec:
+      tolerations:
+        - key: network
+          operator: Equal
+          value: wireless
+          effect: NoSchedule
+      containers:
+        - name: grafana
+          env:
+            - name: GF_DATABASE_TYPE
+              value: mysql
+            - name: GF_DATABASE_HOST
+              value: gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000
+            - name: GF_DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: tidb-serverless
+                  key: MYSQL_DATABASE
+            - name: GF_DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: tidb-serverless
+                  key: MYSQL_USER
+            - name: GF_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tidb-serverless
+                  key: MYSQL_PASSWORD
+            - name: GF_DATABASE_SSL_MODE
+              value: 'true'
+            - name: GF_DATABASE_SERVER_CERT_NAME
+              value: '*.ap-northeast-1.prod.aws.tidbcloud.com'
+            - name: GF_DATABASE_CA_CERT_PATH
+              value: /etc/ssl/certs/ca-certificates.crt
+            - name: GF_SERVER_DOMAIN
+              value: grafana.fetburner.dev
+            - name: GF_SERVER_ROOT_URL
+              value: https://grafana.fetburner.dev
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: 'false'
+            - name: GF_USERS_AUTO_ASSIGN_ORG
+              value: 'true'
+            - name: GF_AUTH_JWT_ENABLED
+              value: 'true'
+            - name: GF_AUTH_JWT_AUTO_SIGN_UP
+              value: 'true'
+            - name: GF_AUTH_JWT_USERNAME_CLAIM
+              value: email
+            - name: GF_AUTH_JWT_EMAIL_CLAIM
+              value: email
+            - name: GF_AUTH_JWT_EXPECT_CLAIMS
+              value: '{"aud":"d19c664af047841a8204d5ea7643989bafe09d1d8b7c633353e7e7e4f303f5d0"}'
+            - name: GF_AUTH_JWT_HEADER_NAME
+              value: Cf-Access-Jwt-Assertion
+            - name: GF_AUTH_JWT_JWK_SET_URL
+              value: https://fetburner.cloudflareaccess.com/cdn-cgi/access/certs
+            - name: GF_AUTH_JWT_CACHE_TTL
+              value: 60m
+      volumes:
+        - name: grafana
+          emptyDir:
+            medium: Memory
+            sizeLimit: 10Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: thanos-querier
+    app.kubernetes.io/name: thanos-querier
+    app.kubernetes.io/part-of: grafana
+  name: thanos-querier
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thanos-store-gateway
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: thanos-store-gataway
+          envFrom:
+            - configMapRef:
+                name: thanos-bucket
+            - secretRef:
+                name: thanos-bucket
+      volumes:
+        - name: thanos-store
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thanos-compactor
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: thanos-compactor
+          envFrom:
+            - configMapRef:
+                name: thanos-bucket
+            - secretRef:
+                name: thanos-bucket
+      volumes:
+        - name: thanos-store
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snmp-exporter
+spec:
+  replicas: 2

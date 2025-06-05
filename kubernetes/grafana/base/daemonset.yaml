@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/component: node-exporter
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/part-of: grafana
+  name: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: node-exporter
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9100'
+        prometheus.io/path: /metrics
+    spec:
+      containers:
+        - name: exporter
+          image: prom/node-exporter:v1.8.2
+          args:
+            - "--path.procfs=/host/proc"
+            - "--path.sysfs=/host/sys"
+            - "--collector.wifi"
+            - "--collector.filesystem.ignored-mount-points"
+            - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
+          ports:
+            - containerPort: 9100
+              name: node-exporter
+          volumeMounts:
+            - name: rootfs
+              readOnly: true
+              mountPath: /rootfs
+            - name: sys
+              readOnly: true
+              mountPath: /host/sys
+            - name: proc
+              readOnly: true
+              mountPath: /host/proc
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: rootfs
+          hostPath:
+            path: /
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: proc
+          hostPath:
+            path: /proc

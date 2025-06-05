@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: grafana
+
+resources:
+  - ../base
+  - pvc.yaml
+  - sealedsecret.yaml
+  - namespace.yaml
+  - objectbucketclaim.yaml
+
+patches:
+  - path: deployment.patch.yaml
+  - path: statefulset.patch.yaml
+
+configMapGenerator:
+  - name: prometheus
+    files:
+      - config/prometheus.yml
+  - name: snmp-exporter-config
+    files:
+      - config/snmp.yml
+  - name: bucket
+    files:
+      - config/bucket.yml

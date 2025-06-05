@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: thanos-sidecar
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: thanos-sidecar
+          envFrom:
+            - configMapRef:
+                name: thanos-bucket
+            - secretRef:
+                name: thanos-bucket
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+  volumeClaimTemplates:
+    - metadata:
+        labels:
+          app.kubernetes.io/name: prometheus
+          app.kubernetes.io/part-of: grafana
+        name: prometheus
+      spec:
+        storageClassName: rook-ceph-block
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 4Gi

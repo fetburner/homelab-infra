@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/name: thanos-sidecar
+    app.kubernetes.io/part-of: grafana
+  name: thanos-sidecar
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thanos-sidecar
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: thanos-sidecar
+    spec:
+      serviceAccountName: prometheus
+      containers:
+        - image: thanosio/thanos:v0.37.2
+          name: thanos-sidecar
+          args:
+            - sidecar
+            - --grpc-address=0.0.0.0:10091
+            - --tsdb.path=/prometheus
+            - --prometheus.url=http://localhost:9090
+            - --objstore.config-file=/etc/thanos/bucket.yml
+          ports:
+            - containerPort: 10091
+              name: thanos-sidecar
+          volumeMounts:
+            - name: thanos-bucket
+              mountPath: /etc/thanos
+            - name: prometheus
+              mountPath: /prometheus
+          securityContext:
+            readOnlyRootFilesystem: true
+        - image: prom/prometheus
+          name: prometheus
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --storage.tsdb.min-block-duration=2h
+            - --storage.tsdb.max-block-duration=2h
+            - --enable-feature=expand-external-labels
+            - --web.enable-lifecycle
+          ports:
+            - name: prometheus
+              containerPort: 9090
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: prometheus
+              mountPath: /prometheus
+            - name: prometheus-config
+              mountPath: /etc/prometheus
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: prometheus
+        - name: thanos-bucket
+          configMap:
+            name: bucket
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - thanos-sidecar
