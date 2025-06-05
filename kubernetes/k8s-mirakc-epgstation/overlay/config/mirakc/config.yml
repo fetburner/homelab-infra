@@ -1,0 +1,35 @@
+server:
+  addrs:
+    - http: 0.0.0.0:40772
+
+epg:
+  cache-dir: /var/lib/mirakc/epg
+
+tuners:
+  - name: PX-S1UD_T1
+    types:
+      - GR
+    command: recdvb --dev 0 --b25 --strip {{channel}} {{duration}} -
+
+channels:
+  - name: ＮＨＫＥテレ
+    type: GR
+    channel: '13'
+  - name: 瀬戸内海放送
+    type: GR
+    channel: '17'
+  - name: ＲＮＣ西日本テレビ
+    type: GR
+    channel: '15'
+  - name: ＴＳＣテレビせとうち
+    type: GR
+    channel: '18'
+  - name: ＲＳＫテレビ
+    type: GR
+    channel: '21'
+  - name: ＮＨＫ総合
+    type: GR
+    channel: '24'
+  - name: ＯＨＫ
+    type: GR
+    channel: '27'

@@ -1,0 +1,141 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-all
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudflare-allow
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: epgstation-cloudflared
+  policyTypes:
+    - Egress
+  egress:
+    - {}
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: epgstation-nginx
+      ports:
+        - protocol: TCP
+          port: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nginx-allow
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: epgstation-nginx
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: epgstation-cloudflared
+      ports:
+        - protocol: TCP
+          port: 80
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: epgstation-epgstation
+      ports:
+        - protocol: TCP
+          port: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: epgstation-allow
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: epgstation-epgstation
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: epgstation-nginx
+      ports:
+        - protocol: TCP
+          port: 8888
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: epgstation-mirakc
+      ports:
+        - protocol: TCP
+          port: 40772
+    - ports:
+        - protocol: TCP
+          port: 4000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mirakc-allow
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: epgstation-mirakc
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: epgstation-epgstation
+      ports:
+        - protocol: TCP
+          port: 40772
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mysqldump-allow
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: epgstation-mysqldump
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 3306

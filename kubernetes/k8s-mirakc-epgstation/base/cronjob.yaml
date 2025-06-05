@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  labels:
+    app.kubernetes.io/component: mysqldump
+    app.kubernetes.io/name: epgstation-mysqldump
+    app.kubernetes.io/part-of: epgstation
+  name: epgstation-mysqldump
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: epgstation-mysqldump
+        spec:
+          containers:
+            - name: epgstation-mysqldump
+              image: mysql:8.4
+              command: ["/bin/sh"]
+              args: ["-c", "/usr/bin/mysqldump -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} ${MYSQL_DATABASE} > /backup/`date +%Y%m%d`-epgstation.sql"]
+              envFrom:
+                - secretRef:
+                    name: tidb-serverless
+              volumeMounts:
+                - name: mysqldump
+                  mountPath: /backup
+              securityContext:
+                readOnlyRootFilesystem: true
+          restartPolicy: Never
+          volumes:
+            - name: mysqldump
+              persistentVolumeClaim:
+                claimName: epgstation-mysqldump

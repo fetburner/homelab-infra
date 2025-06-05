@@ -1,0 +1,202 @@
+port: 8888
+clientSocketioPort: 443
+mirakurunPath: http://mirakc:40772/
+
+dbtype: mysql
+mysql:
+    host: 127.0.0.1
+    port: 6033
+    user: '${MYSQL_USER}'
+    password: '${MYSQL_PASSWORD}'
+    database: epgstation
+
+epgUpdateIntervalTime: 360
+
+isEnabledDropCheck: true
+
+conflictPriority: 1
+recPriority: 2
+
+recordedFormat: '%YEAR%年%MONTH%月%DAY%日%HOUR%時%MIN%分%SEC%秒%CHNAME%-%TITLE%'
+recordedFileExtension: .m2ts
+recorded:
+    - name: recorded
+      path: '%ROOT%/recorded'
+
+thumbnail: '%ROOT%/thumbnail'
+thumbnailSize: 480x270
+thumbnailPosition: 5
+
+ffmpeg: /usr/local/bin/ffmpeg
+ffprobe: /usr/local/bin/ffprobe
+
+encodeProcessNum: 4
+concurrentEncodeNum: 1
+encode:
+    - name: 'H.264'
+      cmd: '%NODE% %ROOT%/config/enc.js'
+      suffix: .mp4
+      rate: 20
+
+urlscheme:
+    m2ts:
+        ios: vlc-x-callback://x-callback-url/stream?url=PROTOCOL://ADDRESS
+        android: intent://ADDRESS#Intent;package=org.videolan.vlc;type=video;scheme=PROTOCOL;end
+    video:
+        ios: infuse://x-callback-url/play?url=PROTOCOL://ADDRESS
+        android: intent://ADDRESS#Intent;package=com.mxtech.videoplayer.ad;type=video;scheme=PROTOCOL;end
+    download:
+        ios: vlc-x-callback://x-callback-url/download?url=PROTOCOL://ADDRESS&filename=FILENAME
+
+stream:
+    live:
+        ts:
+            m2ts:
+                - name: 1080p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -b:a 192k -ac 2
+                      -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=1080,hwupload -b:v 6000k -y -f mpegts pipe:1'
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -b:a 192k -ac 2
+                      -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -y -f mpegts pipe:1'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -b:a 128k -ac 2
+                      -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k -y -f mpegts pipe:1'
+                - name: 無変換
+
+            m2tsll:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d
+                      copy -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1 -c:a aac -ar 48000 -b:a 192k -ac 2
+                      -c:v h264_vaapi -flags +cgop -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -y -f mpegts pipe:1'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -f mpegts -analyzeduration 500000 -i pipe:0 -map 0 -c:s copy -c:d
+                      copy -ignore_unknown -fflags nobuffer -flags low_delay -max_delay 250000 -max_interleave_delta 1 -c:a aac -ar 48000 -b:a 128k -ac 2
+                      -c:v h264_vaapi -flags +cgop -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k -y -f mpegts pipe:1'
+
+            webm:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -c:a libvorbis -ar 48000 -b:a 192k -ac 2
+                      -c:v vp9_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -y -f webm pipe:1'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -c:a libvorbis -ar 48000 -b:a 128k -ac 2
+                      -c:v vp9_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k -y -f webm pipe:1'
+
+            mp4:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -b:a 192k -ac 2
+                      -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -profile:v baseline
+                      -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -b:a 128k -ac 2
+                      -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k -profile:v baseline
+                      -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
+
+            hls:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -map 0 -ignore_unknown
+                      -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1
+                      -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
+                      aac -ar 48000 -b:a 192k -ac 2 -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k
+                      -flags +loop-global_header %OUTPUT%'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -re -dual_mono_mode main -i pipe:0 -sn -map 0 -ignore_unknown
+                      -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1
+                      -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
+                      aac -ar 48000 -b:a 128k -ac 2 -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k
+                      -flags +loop-global_header %OUTPUT%'
+    recorded:
+        ts:
+            webm:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -i pipe:0 -sn -c:a libvorbis -ar 48000 -b:a 192k -ac 2
+                      -c:v vp9_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -y -f webm pipe:1'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -i pipe:0 -sn -c:a libvorbis -ar 48000 -b:a 128k -ac 2
+                      -c:v vp9_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k -y -f webm pipe:1'
+
+            mp4:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -b:a 192k -ac 2 -c:v
+                      h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -profile:v baseline
+                      -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -b:a 128k -ac 2 -c:v
+                      h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k -profile:v baseline
+                      -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
+
+            hls:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -i pipe:0 -sn -map 0 -ignore_unknown
+                      -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                      -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
+                      aac -ar 48000 -b:a 192k -ac 2 -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=720,hwupload
+                      -b:v 3000k -flags +loop-global_header %OUTPUT%'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -i pipe:0 -sn -map 0 -ignore_unknown
+                      -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                      -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
+                      aac -ar 48000 -b:a 128k -ac 2 -c:v h264_vaapi -vf format=nv12|vaapi,deinterlace_vaapi,scale_vaapi=w=-2:h=480,hwupload
+                      -b:v 1500k -flags +loop-global_header %OUTPUT%'
+
+        encoded:
+            webm:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -ss %SS% -i %INPUT% -sn -c:a libvorbis -ar 48000 -b:a
+                      192k -ac 2 -c:v vp9_vaapi -vf format=nv12|vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -y -f webm pipe:1'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -ss %SS% -i %INPUT% -sn -c:a libvorbis -ar 48000 -b:a
+                      128k -ac 2 -c:v vp9_vaapi -vf format=nv12|vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k -y -f webm pipe:1'
+
+            mp4:
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -ss %SS% -i %INPUT% -sn -c:a aac -ar 48000 -b:a 192k -ac
+                      2 -c:v h264_vaapi -vf format=nv12|vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -profile:v baseline
+                      -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -ss %SS% -i %INPUT% -sn -c:a aac -ar 48000 -b:a 128k -ac
+                      2 -c:v h264_vaapi -vf format=nv12|vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 1500k -profile:v baseline
+                      -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
+
+            hls:
+                - name: 1080p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -ss %SS% -i %INPUT% -sn -ignore_unknown
+                      -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                      -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
+                      aac -ar 48000 -b:a 192k -ac 2 -c:v h264_vaapi -vf format=nv12|vaapi,scale_vaapi=w=-2:h=1080,hwupload -b:v 6000k -flags
+                      +loop-global_header %OUTPUT%'
+                - name: 720p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -ss %SS% -i %INPUT% -sn -ignore_unknown
+                      -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                      -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
+                      aac -ar 48000 -b:a 192k -ac 2 -c:v h264_vaapi -vf format=nv12|vaapi,scale_vaapi=w=-2:h=720,hwupload -b:v 3000k -flags
+                      +loop-global_header %OUTPUT%'
+                - name: 480p
+                  cmd:
+                      '%FFMPEG% -hwaccel vaapi -hwaccel_output_format vaapi -dual_mono_mode main -ss %SS% -i %INPUT% -sn -ignore_unknown
+                      -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
+                      -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
+                      aac -ar 48000 -b:a 128k -ac 2 -c:v h264_vaapi -vf format=nv12|vaapi,scale_vaapi=w=-2:h=480,hwupload -b:v 3000k -flags
+                      +loop-global_header %OUTPUT%'

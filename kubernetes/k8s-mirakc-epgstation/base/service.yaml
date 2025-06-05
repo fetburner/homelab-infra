@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: nginx
+    app.kubernetes.io/name: epgstation-nginx
+    app.kubernetes.io/part-of: epgstation
+  name: nginx
+spec:
+  ports:
+    - name: nginx
+      port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: epgstation-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: epgstation
+    app.kubernetes.io/name: epgstation-epgstation
+    app.kubernetes.io/part-of: epgstation
+  name: epgstation
+spec:
+  ports:
+    - name: epgstation
+      port: 8888
+      targetPort: 8888
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: epgstation-epgstation
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: mirakc
+    app.kubernetes.io/name: epgstation-mirakc
+    app.kubernetes.io/part-of: epgstation
+  name: mirakc
+spec:
+  ports:
+    - name: mirakc
+      port: 40772
+      targetPort: 40772
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: epgstation-mirakc

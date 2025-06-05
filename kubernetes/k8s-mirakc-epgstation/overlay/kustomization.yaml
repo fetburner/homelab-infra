@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: epgstation
+
+resources:
+  - ../base
+  - pvc.yaml
+  - sealedsecret.yaml
+  - namespace.yaml
+
+patches:
+  - path: deployment.patch.yaml
+  - path: statefulset.patch.yaml
+
+configMapGenerator:
+  - name: epgstation-nginx
+    files:
+      - config/nginx/nginx.conf
+  - name: epgstation-mirakc
+    files:
+      - config/mirakc/config.yml
+  - name: epgstation-proxysql
+    files:
+      - config/proxysql/config.cnf
+  - name: epgstation-epgstation
+    files:
+      - config/epgstation/config.yml
+      - config/epgstation/enc.js
+      - config/epgstation/epgUpdaterLogConfig.yml
+      - config/epgstation/operatorLogConfig.yml
+      - config/epgstation/serviceLogConfig.yml

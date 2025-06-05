@@ -1,0 +1,173 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: epgstation-mirakc
+spec:
+  template:
+    spec:
+      nodeSelector:
+        epgstation/tuner: dvb
+      containers:
+        - name: mirakc
+          env:
+            - name: RUST_LOG
+              value: info
+          volumeMounts:
+            - name: mirakc-tuner
+              mountPath: /dev/dvb
+            - name: epgstation-mirakc-epg
+              mountPath: /var/lib/mirakc/epg
+      volumes:
+        - name: mirakc-tuner
+          hostPath:
+            path: /dev/dvb
+  volumeClaimTemplates:
+    - metadata:
+        labels:
+          app.kubernetes.io/name: epgstation-mirakc-epg
+          app.kubernetes.io/part-of: epgstation
+        name: epgstation-mirakc-epg
+      spec:
+        storageClassName: rook-ceph-block
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 32Mi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: epgstation-epgstation
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+        - name: epgstation
+          volumeMounts:
+            - name: epgstation-graphics-driver
+              mountPath: /dev/dri
+            - name: epgstation-epgstation-logs
+              mountPath: /app/logs
+            - name: epgstation-epgstation-drop
+              mountPath: /app/drop
+            - name: epgstation-epgstation-thumbnail
+              mountPath: /app/thumbnail
+            - name: epgstation-epgstation-streamfiles
+              mountPath: /app/data/streamfiles
+            - name: epgstation-epgstation-recorded
+              mountPath: /app/recorded
+      initContainers:
+        - name: interpolate-epgstation-config
+          image: ghcr.io/fetburner/envsubst
+          command:
+            - "sh"
+            - "-c"
+            - |
+              cp --archive --parents --no-dereference /app/config /tmp &&
+              for file in $(find /app/config -type f); do
+                envsubst < $file > /tmp/$file;
+              done
+          envFrom:
+            - secretRef:
+                name: tidb-serverless
+          volumeMounts:
+            - name: epgstation-config
+              mountPath: /tmp/app/config
+            - name: epgstation-raw-config
+              mountPath: /app/config
+        - name: interpolate-proxysql-config
+          image: ghcr.io/fetburner/envsubst
+          command:
+            - "sh"
+            - "-c"
+            - |
+              cp --archive --parents --no-dereference /etc/proxysql /tmp &&
+              for file in $(find /etc/proxysql -type f); do
+                envsubst < $file > /tmp/$file;
+              done
+          envFrom:
+            - secretRef:
+                name: tidb-serverless
+          volumeMounts:
+            - name: proxysql-config
+              mountPath: /tmp/etc/proxysql
+            - name: proxysql-raw-config
+              mountPath: /etc/proxysql
+      volumes:
+        - name: epgstation-graphics-driver
+          hostPath:
+            path: /dev/dri
+        - name: epgstation-epgstation-logs
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
+        - name: proxysql-data
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
+        - name: epgstation-raw-config
+          configMap:
+            name: epgstation-epgstation
+        - name: epgstation-config
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
+        - name: proxysql-raw-config
+          configMap:
+            name: epgstation-proxysql
+        - name: proxysql-config
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
+  volumeClaimTemplates:
+    - metadata:
+        labels:
+          app.kubernetes.io/name: epgstation-epgstation-drop
+          app.kubernetes.io/part-of: epgstation
+        name: epgstation-epgstation-drop
+      spec:
+        storageClassName: ds420plus-kagawa
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 128Mi
+    - metadata:
+        labels:
+          app.kubernetes.io/name: epgstation-epgstation-thumbnail
+          app.kubernetes.io/part-of: epgstation
+        name: epgstation-epgstation-thumbnail
+      spec:
+        storageClassName: ds420plus-kagawa
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        labels:
+          app.kubernetes.io/name: epgstation-epgstation-streamfiles
+          app.kubernetes.io/part-of: epgstation
+        name: epgstation-epgstation-streamfiles
+      spec:
+        storageClassName: ds420plus-kagawa
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 4Gi
+    - metadata:
+        labels:
+          app.kubernetes.io/name: epgstation-epgstation-recorded
+          app.kubernetes.io/part-of: epgstation
+        name: epgstation-epgstation-recorded
+      spec:
+        storageClassName: ds420plus-kagawa
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi

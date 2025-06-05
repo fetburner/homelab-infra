@@ -1,0 +1,25 @@
+mysql_variables =
+{
+  default_query_timeout = 36000000
+  monitor_enabled = false
+}
+
+mysql_servers =
+(
+  {
+    address = "gateway01.ap-northeast-1.prod.aws.tidbcloud.com"
+    port = 4000
+    hostgroup = 0
+    max_connections = 100
+    use_ssl = 1
+  },
+)
+
+mysql_users:
+(
+  {
+    username = "${MYSQL_USER}"
+    password = "${MYSQL_PASSWORD}"
+    default_hostgroup = 0
+  },
+)

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: epgstation-nginx
+spec:
+  template:
+    spec:
+      containers:
+        - name: nginx
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              memory: 150Mi
+      volumes:
+        - name: nginx-cache
+          emptyDir:
+            medium: Memory
+            sizeLimit: 128Mi
+        - name: nginx-pid
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
