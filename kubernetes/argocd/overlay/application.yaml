@@ -1,0 +1,103 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: kubernetes/argocd/overlay
+    repoURL: https://github.com/fetburner/homelab-infra
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: kubernetes/grafana/overlay
+    repoURL: https://github.com/fetburner/homelab-infra
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8s-mirakc-epgstation
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: kubernetes/k8s-mirakc-epgstation/overlay
+    repoURL: https://github.com/fetburner/homelab-infra
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: kubernetes/rook-ceph/overlay
+    repoURL: https://github.com/fetburner/homelab-infra
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: descheduler
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/descheduler
+    chart: descheduler
+    targetRevision: 0.32.2
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sealed-secrets
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  project: default
+  source:
+    repoURL: https://bitnami-labs.github.io/sealed-secrets
+    chart: sealed-secrets
+    targetRevision: 2.17.2
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

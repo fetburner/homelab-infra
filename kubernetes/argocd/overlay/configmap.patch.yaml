@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+data:
+  admin.enabled: "false"
+  kustomize.buildOptions: "--enable-helm"
+  url: https://argocd.fetburner.dev
+  dex.config: |
+    connectors:
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: $dex.github.clientID
+          clientSecret: $dex.github.clientSecret
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+data:
+  policy.csv: |
+    p, role:org-admin, *, *, *, allow
+    p, role:none, *, *, *, deny
+
+    g, masayuki3141592@gmail.com, role:org-admin
+  policy.default: role:none
+  scopes: '[email]'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cmd-params-cm
+data:
+  server.insecure: "true"
