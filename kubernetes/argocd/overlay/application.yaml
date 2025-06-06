@@ -11,6 +11,8 @@ spec:
     repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
@@ -28,6 +30,8 @@ spec:
     repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
@@ -45,6 +49,8 @@ spec:
     repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
@@ -62,6 +68,8 @@ spec:
     repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
