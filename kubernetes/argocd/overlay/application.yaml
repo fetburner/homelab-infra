@@ -7,7 +7,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: kubernetes/argocd/overlay
+    path: kubernetes/argocd
     repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
@@ -24,7 +24,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: kubernetes/grafana/overlay
+    path: kubernetes/grafana
     repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
@@ -41,7 +41,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: kubernetes/k8s-mirakc-epgstation/overlay
+    path: kubernetes/k8s-mirakc-epgstation
     repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
@@ -58,7 +58,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: kubernetes/rook-ceph/overlay
+    path: kubernetes/rook-ceph
     repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
