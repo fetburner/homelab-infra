@@ -5,6 +5,7 @@ metadata:
 spec:
   destination:
     server: https://kubernetes.default.svc
+    namespace: argocd
   project: default
   source:
     path: kubernetes/argocd
@@ -24,6 +25,7 @@ metadata:
 spec:
   destination:
     server: https://kubernetes.default.svc
+    namespace: grafana
   project: default
   source:
     path: kubernetes/grafana
@@ -43,6 +45,7 @@ metadata:
 spec:
   destination:
     server: https://kubernetes.default.svc
+    namespace: epgstation
   project: default
   source:
     path: kubernetes/k8s-mirakc-epgstation
@@ -62,6 +65,7 @@ metadata:
 spec:
   destination:
     server: https://kubernetes.default.svc
+    namespace: rook-ceph
   project: default
   source:
     path: kubernetes/rook-ceph

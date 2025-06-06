@@ -7,7 +7,6 @@ resources:
   - ../base
   - pvc.yaml
   - sealedsecret.yaml
-  - namespace.yaml
 
 patches:
   - path: deployment.patch.yaml
