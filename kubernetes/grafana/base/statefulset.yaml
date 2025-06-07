@@ -35,7 +35,7 @@ spec:
               mountPath: /prometheus
           securityContext:
             readOnlyRootFilesystem: true
-        - image: prom/prometheus
+        - image: prom/prometheus:v3.4.1
           name: prometheus
           args:
             - --config.file=/etc/prometheus/prometheus.yml
