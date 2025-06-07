@@ -77,7 +77,7 @@ spec:
         app.kubernetes.io/name: thanos-store-gateway
     spec:
       containers:
-        - image: thanosio/thanos:v0.37.2
+        - image: thanosio/thanos:v0.38.0
           name: thanos-store-gataway
           args:
             - store
@@ -120,7 +120,7 @@ spec:
         app.kubernetes.io/name: thanos-querier
     spec:
       containers:
-        - image: thanosio/thanos:v0.37.2
+        - image: thanosio/thanos:v0.38.0
           name: thanos-querier
           args:
             - query
@@ -153,7 +153,7 @@ spec:
         app.kubernetes.io/name: thanos-compactor
     spec:
       containers:
-        - image: thanosio/thanos:v0.37.2
+        - image: thanosio/thanos:v0.38.0
           name: thanos-compactor
           args:
             - compact

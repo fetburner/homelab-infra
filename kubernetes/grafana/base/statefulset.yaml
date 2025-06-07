@@ -17,7 +17,7 @@ spec:
     spec:
       serviceAccountName: prometheus
       containers:
-        - image: thanosio/thanos:v0.37.2
+        - image: thanosio/thanos:v0.38.0
           name: thanos-sidecar
           args:
             - sidecar
