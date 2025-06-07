@@ -134,3 +134,24 @@ spec:
     automated:
       prune: true
       selfHeal: true
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      name: autoscalinglisteners.actions.github.com
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /spec/preserveUnknownFields
+    - group: apiextensions.k8s.io
+      name: autoscalingrunnersets.actions.github.com
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /spec/preserveUnknownFields
+    - group: apiextensions.k8s.io
+      name: ephemeralrunners.actions.github.com
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /spec/preserveUnknownFields
+    - group: apiextensions.k8s.io
+      name: ephemeralrunnersets.actions.github.com
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /spec/preserveUnknownFields
