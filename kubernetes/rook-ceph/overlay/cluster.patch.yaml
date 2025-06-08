@@ -13,5 +13,8 @@ spec:
       - name: raspberrypi5-4g
         devices:
           - name: /dev/disk/by-partuuid/5b15ac5e-ef21-4619-a624-b74e7bcd12b2
+      - name: st170e
+        devices:
+          - name: /dev/disk/by-partuuid/39d0a723-f44d-4be6-82af-668ae2f1e61f
   monitoring:
     metricsDisabled: true
