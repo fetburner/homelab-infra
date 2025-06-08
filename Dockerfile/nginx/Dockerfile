@@ -7,6 +7,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
 WORKDIR /tmp/build
 COPY ./script/extractlibrary cp.sh
 RUN which nginx >> cplist && \
+    which envsubst >> cplist && \
     ./cp.sh cplist /asset
 
 # final image
