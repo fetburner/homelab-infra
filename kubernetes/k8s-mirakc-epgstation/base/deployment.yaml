@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: ghcr.io/fetburner/nginx
+          image: nginx:1.28.0-alpine-slim
           ports:
             - containerPort: 80
           volumeMounts:
