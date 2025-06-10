@@ -22,9 +22,13 @@ COPY --from=nginx-image /var/log/nginx /var/log/nginx
 COPY --from=nginx-image /var/cache/nginx /var/cache/nginx
 
 RUN --mount=type=bind,from=nginx-image,target=/mnt ["/mnt/bin/busybox", "mkdir", "-m", "755", "/run"]
+# hadolint ignore=DL3059
 RUN --mount=type=bind,from=nginx-image,target=/mnt ["/mnt/bin/busybox", "ln", "-sf", "/run", "/var/run"]
+# hadolint ignore=DL3059
 RUN --mount=type=bind,from=nginx-image,target=/mnt ["/mnt/bin/busybox", "ln", "-sf", "/dev/stderr", "/var/log/nginx/error.log"]
+# hadolint ignore=DL3059
 RUN --mount=type=bind,from=nginx-image,target=/mnt ["/mnt/bin/busybox", "ln", "-sf", "/dev/stdout", "/var/log/nginx/access.log"]
+# hadolint ignore=DL3059
 
 EXPOSE 80
 
