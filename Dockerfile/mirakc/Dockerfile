@@ -1,4 +1,5 @@
 # additional pcsc tool
+# hadolint ignore=DL3007
 FROM ghcr.io/fetburner/pcsc-tool-build:latest AS pcsc-tool-image
 
 # recpt1, recdvb
