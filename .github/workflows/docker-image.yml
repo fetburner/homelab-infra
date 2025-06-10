@@ -54,6 +54,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
+        if: ${{ steps.changed-files.outputs.all_modified_files }}
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.actor }}/${{ matrix.name }}
