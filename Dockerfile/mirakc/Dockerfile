@@ -46,7 +46,7 @@ RUN which recpt1 >> cplist && \
     ./cp.sh cplist /build
 
 # mirakc-arib, mirakc
-FROM mirakc/mirakc:3.4.17-alpine AS mirakc-image
+FROM mirakc/mirakc:3.4.20-alpine AS mirakc-image
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     apk add bash
