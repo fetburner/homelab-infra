@@ -15,16 +15,18 @@ COPY --from=pcsc-tool-image / /
 # libaribb25
 WORKDIR /tmp/libaribb25
 RUN curl -fsSL https://github.com/tsukumijima/libaribb25/tarball/master | tar -xz --strip-components=1 && \
-    cmake -B build && \
-    cd build && \
-    make -j$(nproc) && \
+    cmake -B build
+
+WORKDIR /tmp/libaribb25/build
+RUN make -j$(nproc) && \
     make install
 
 # recpt1
 WORKDIR /tmp/recpt1
-RUN curl -fsSL https://github.com/stz2012/recpt1/tarball/master | tar -xz --strip-components=1 && \
-    cd recpt1 && \
-    ./autogen.sh && \
+RUN curl -fsSL https://github.com/stz2012/recpt1/tarball/master | tar -xz --strip-components=1
+
+WORKDIR /tmp/recpt1/recpt1
+RUN ./autogen.sh && \
     ./configure --enable-b25 && \
     make -j$(nproc) && \
     make install
