@@ -17,6 +17,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
 
 # aribb24
 WORKDIR /tmp/aribb24
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/nkoriyama/aribb24/tarball/master | tar -xz --strip-components=1 && \
     autoreconf -fiv && \
     ./configure && \
@@ -25,6 +26,7 @@ RUN curl -fsSL https://github.com/nkoriyama/aribb24/tarball/master | tar -xz --s
 
 #ffmpeg build
 WORKDIR /tmp/ffmpeg
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN curl -fsSL http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 | tar -xj --strip-components=1 && \
     case ${TARGETPLATFORM} in \
       linux/amd64) \
