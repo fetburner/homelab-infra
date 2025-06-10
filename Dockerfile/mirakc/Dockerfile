@@ -14,6 +14,7 @@ COPY --from=pcsc-tool-image / /
 
 # libaribb25
 WORKDIR /tmp/libaribb25
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/tsukumijima/libaribb25/tarball/master | tar -xz --strip-components=1 && \
     cmake -B build
 
@@ -23,6 +24,7 @@ RUN make -j$(nproc) && \
 
 # recpt1
 WORKDIR /tmp/recpt1
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/stz2012/recpt1/tarball/master | tar -xz --strip-components=1
 
 WORKDIR /tmp/recpt1/recpt1
@@ -33,6 +35,7 @@ RUN ./autogen.sh && \
 
 # recdvb
 WORKDIR /tmp/recdvb
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/kaikoma-soft/recdvb/tarball/master | tar -xz --strip-components=1 && \
     ./autogen.sh && \
     ./configure --enable-b25 && \
