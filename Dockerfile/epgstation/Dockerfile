@@ -21,10 +21,10 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     apk add curl
 
 WORKDIR /app
+RUN curl -fsSL https://github.com/l3tnun/EPGStation/tarball/v2.10.0 | tar -xz --strip-components=1
+WORKDIR /app/client
 RUN --mount=type=cache,target=~/.npm,sharing=locked \
     --mount=type=cache,target=/app/client/node_modules,sharing=locked \
-    curl -fsSL https://github.com/l3tnun/EPGStation/tarball/v2.10.0 | tar -xz --strip-components=1 && \
-    cd /app/client && \
     npm config set fetch-retries 10 && \
     npm config set fetch-retry-mintimeout 100000 && \
     npm config set fetch-retry-maxtimeout 600000 && \
