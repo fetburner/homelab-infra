@@ -21,7 +21,7 @@ SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/nkoriyama/aribb24/tarball/master | tar -xz --strip-components=1 && \
     autoreconf -fiv && \
     ./configure && \
-    make -j$(nproc) && \
+    make -j"$(nproc)" && \
     make install
 
 #ffmpeg build
@@ -72,7 +72,7 @@ RUN curl -fsSL http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 | tar
           --disable-debug \
           --disable-doc;; \
     esac && \
-    make -j$(nproc) && \
+    make -j"$(nproc)" && \
     make install
 
 WORKDIR /tmp/build
