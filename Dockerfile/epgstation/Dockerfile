@@ -22,6 +22,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     apk add curl
 
 WORKDIR /app
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN curl -fsSL https://github.com/l3tnun/EPGStation/tarball/v2.10.0 | tar -xz --strip-components=1
 WORKDIR /app/client
 RUN --mount=type=cache,target=~/.npm,sharing=locked \
@@ -45,6 +46,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
 ENV DOCKER="YES"
 
 WORKDIR /app
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN --mount=type=tmpfs,target=/app/client \
     --mount=type=cache,target=~/.npm,sharing=locked \
     curl -fsSL https://github.com/l3tnun/EPGStation/tarball/v2.10.0 | tar -xz --strip-components=1 && \
