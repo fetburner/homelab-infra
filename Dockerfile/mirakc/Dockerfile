@@ -19,7 +19,7 @@ RUN curl -fsSL https://github.com/tsukumijima/libaribb25/tarball/master | tar -x
     cmake -B build
 
 WORKDIR /tmp/libaribb25/build
-RUN make -j$(nproc) && \
+RUN make -j"$(nproc)" && \
     make install
 
 # recpt1
@@ -30,7 +30,7 @@ RUN curl -fsSL https://github.com/stz2012/recpt1/tarball/master | tar -xz --stri
 WORKDIR /tmp/recpt1/recpt1
 RUN ./autogen.sh && \
     ./configure --enable-b25 && \
-    make -j$(nproc) && \
+    make -j"$(nproc)" && \
     make install
 
 # recdvb
@@ -42,7 +42,7 @@ RUN curl -fsSL https://github.com/kaikoma-soft/recdvb/tarball/master | tar -xz -
     sed -i -e 's/msgbuf/_msgbuf/' recpt1core.h && \
     sed -i '1i#include <sys/types.h>' tsmain.c && \
     sed -i '1i#include <sys/types.h>' tssplitter_lite.c && \
-    make -j$(nproc) && \
+    make -j"$(nproc)" && \
     make install
 
 WORKDIR /tmp/build
