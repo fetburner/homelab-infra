@@ -11,6 +11,7 @@ RUN which node >> cplist && \
     ./cp.sh cplist /build
 
 # FFmpeg
+# hadolint ignore=DL3007
 FROM ghcr.io/fetburner/ffmpeg:latest AS ffmpeg-image
 
 # EPGStation client build
