@@ -1,13 +1,12 @@
+FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
+
 FROM nginx:1.28.0-alpine-slim AS nginx-image
 
-RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
+RUN --mount=type=bind,from=magicpak-image,target=/mnt \
+    --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add bash
-
-WORKDIR /tmp/build
-COPY ./script/extractlibrary cp.sh
-RUN which nginx >> cplist && \
-    ./cp.sh cplist /asset
+    apk add gcc libc-dev openssl-dev pcre2-dev zlib-dev linux-headers && \
+    /mnt/bin/magicpak -v "$(which nginx)" /asset
 
 # final image
 
