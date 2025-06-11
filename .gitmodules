@@ -1,0 +1,3 @@
+[submodule "Dockerfile/epgstation/epgstation"]
+	path = Dockerfile/epgstation/epgstation
+	url = https://github.com/fetburner/EPGStation.git
