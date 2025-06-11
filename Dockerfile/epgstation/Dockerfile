@@ -22,8 +22,8 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     apk add curl
 
 WORKDIR /app
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
-RUN curl -fsSL https://github.com/l3tnun/EPGStation/tarball/v2.10.0 | tar -xz --strip-components=1
+COPY ./Dockerfile/epgstation/epgstation /app
+
 WORKDIR /app/client
 RUN --mount=type=cache,target=~/.npm,sharing=locked \
     --mount=type=cache,target=/app/client/node_modules,sharing=locked \
@@ -46,10 +46,9 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
 ENV DOCKER="YES"
 
 WORKDIR /app
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+COPY ./Dockerfile/epgstation/epgstation /app
 RUN --mount=type=tmpfs,target=/app/client \
     --mount=type=cache,target=~/.npm,sharing=locked \
-    curl -fsSL https://github.com/l3tnun/EPGStation/tarball/v2.10.0 | tar -xz --strip-components=1 && \
     npm config set fetch-retries 10 && \
     npm config set fetch-retry-mintimeout 100000 && \
     npm config set fetch-retry-maxtimeout 600000 && \
