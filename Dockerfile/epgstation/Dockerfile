@@ -1,14 +1,13 @@
+FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
+
 # node.js
 FROM node:18-alpine3.21 AS node-image
 
-RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
+RUN --mount=type=bind,from=magicpak-image,target=/mnt \
+    --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add bash
-
-WORKDIR /tmp
-COPY ./script/extractlibrary cp.sh
-RUN which node >> cplist && \
-    ./cp.sh cplist /build
+    apk add gcc libc-dev && \
+    /mnt/bin/magicpak -v "$(which node)" /build
 
 # FFmpeg
 # hadolint ignore=DL3007
