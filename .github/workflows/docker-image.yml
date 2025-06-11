@@ -29,7 +29,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v46
+        with:
+          files: Dockerfile/${{ matrix.name }}/**
+
       - uses: hadolint/hadolint-action@v3.1.0
+        if: ${{ steps.changed-files.outputs.all_modified_files }}
         with:
           dockerfile: Dockerfile/${{ matrix.name }}/Dockerfile
 
