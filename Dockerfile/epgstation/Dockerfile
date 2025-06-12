@@ -9,10 +9,6 @@ RUN --mount=type=bind,from=magicpak-image,target=/mnt \
     apk add gcc libc-dev && \
     /mnt/bin/magicpak -v "$(which node)" /build
 
-# FFmpeg
-# hadolint ignore=DL3007
-FROM ghcr.io/fetburner/ffmpeg:latest AS ffmpeg-image
-
 # EPGStation client build
 FROM node:18-alpine3.21 AS epgstation-client-image
 
@@ -53,6 +49,10 @@ RUN --mount=type=tmpfs,target=/app/client \
 
 WORKDIR /build
 RUN cp --archive --parents --no-dereference /app /build
+
+# FFmpeg
+# hadolint ignore=DL3007
+FROM ghcr.io/fetburner/ffmpeg:latest AS ffmpeg-image
 
 # final image
 FROM busybox:1.37.0-musl
