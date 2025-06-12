@@ -1,14 +1,12 @@
+FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
+
 FROM alpine:3.22.0 AS build-image
 
-RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
+RUN --mount=type=bind,from=magicpak-image,target=/mnt \
+    --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add bash envsubst
-
-
-WORKDIR /tmp/build
-COPY ./script/extractlibrary cp.sh
-RUN which envsubst >> cplist && \
-    ./cp.sh cplist /build
+    apk add gcc libc-dev envsubst && \
+    /mnt/bin/magicpak -v "$(which envsubst)" /build
 
 # final image
 
