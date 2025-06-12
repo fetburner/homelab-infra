@@ -3,11 +3,9 @@ FROM alpine:3.22.0 AS ffmpeg-image
 
 ARG TARGETPLATFORM
 
-ENV FFMPEG_VERSION=6.1.2
-
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add autoconf automake bash binutils bzip2 cmake curl coreutils diffutils file g++ gcc gperf libtool \
+    apk add autoconf automake bash binutils bzip2 cmake coreutils diffutils file g++ gcc gperf libtool \
       make python3 openssl-dev tar yasm nasm zlib-dev expat-dev pkgconfig libass-dev lame-dev opus-dev \
       libtheora-dev libvorbis-dev libvpx-dev x264-dev x265-dev libva-dev libgcc libstdc++ ca-certificates \
       libgomp expat git lame-libs libass libvpx opus libtheora libvorbis x264-libs x265-libs && \
@@ -25,9 +23,8 @@ RUN autoreconf -fiv && \
 
 #ffmpeg build
 WORKDIR /tmp/ffmpeg
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
-RUN curl -fsSL http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 | tar -xj --strip-components=1 && \
-    case ${TARGETPLATFORM} in \
+COPY ./Dockerfile/ffmpeg/ffmpeg /tmp/ffmpeg
+RUN case ${TARGETPLATFORM} in \
       linux/amd64) \
         ./configure \
           --extra-cflags="-Wno-error=incompatible-pointer-types" \
