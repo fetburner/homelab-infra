@@ -5,7 +5,7 @@ FROM nginx:1.28.0-alpine-slim AS nginx-image
 RUN --mount=type=bind,from=magicpak-image,target=/mnt \
     --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add gcc libc-dev openssl-dev pcre2-dev zlib-dev linux-headers && \
+    apk add gcc libc-dev && \
     /mnt/bin/magicpak -v "$(which nginx)" /asset
 
 # final image
