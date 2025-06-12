@@ -17,9 +17,8 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
 
 # aribb24
 WORKDIR /tmp/aribb24
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
-RUN curl -fsSL https://github.com/nkoriyama/aribb24/tarball/master | tar -xz --strip-components=1 && \
-    autoreconf -fiv && \
+COPY ./Dockerfile/ffmpeg/aribb24 /tmp/aribb24
+RUN autoreconf -fiv && \
     ./configure && \
     make -j"$(nproc)" && \
     make install

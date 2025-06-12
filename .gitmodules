@@ -4,3 +4,6 @@
 [submodule "Dockerfile/arib-b25-stream-test/libaribb25"]
 	path = Dockerfile/arib-b25-stream-test/libaribb25
 	url = https://github.com/tsukumijima/libaribb25.git
+[submodule "Dockerfile/ffmpeg/aribb24"]
+	path = Dockerfile/ffmpeg/aribb24
+	url = https://github.com/nkoriyama/aribb24.git
