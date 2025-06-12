@@ -16,10 +16,6 @@ FROM ghcr.io/fetburner/ffmpeg:latest AS ffmpeg-image
 # EPGStation client build
 FROM node:18-alpine3.21 AS epgstation-client-image
 
-RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk add curl
-
 WORKDIR /app
 COPY ./Dockerfile/epgstation/epgstation /app
 
@@ -40,7 +36,7 @@ FROM node:18-alpine3.21 AS epgstation-server-image
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add curl g++ make pkgconf python3 py3-pip
+    apk add g++ make pkgconf python3 py3-pip
 
 ENV DOCKER="YES"
 
