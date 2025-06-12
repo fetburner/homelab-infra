@@ -6,16 +6,15 @@ FROM alpine:3.22.0 AS build-image
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add autoconf automake bash clang cmake curl make pkgconfig linux-headers
+    apk add autoconf automake bash clang cmake make pkgconfig linux-headers
 
 # additional pcsc tool
 COPY --from=pcsc-tool-image / /
 
 # libaribb25
 WORKDIR /tmp/libaribb25
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
-RUN curl -fsSL https://github.com/tsukumijima/libaribb25/tarball/master | tar -xz --strip-components=1 && \
-    cmake -B build
+COPY ./Dockerfile/arib-b25-stream-test/libaribb25 /tmp/libaribb25
+RUN cmake -B build
 
 WORKDIR /tmp/libaribb25/build
 RUN make -j"$(nproc)" && \

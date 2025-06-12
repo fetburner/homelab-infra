@@ -1,3 +1,6 @@
 [submodule "Dockerfile/epgstation/epgstation"]
 	path = Dockerfile/epgstation/epgstation
 	url = https://github.com/fetburner/EPGStation.git
+[submodule "Dockerfile/arib-b25-stream-test/libaribb25"]
+	path = Dockerfile/arib-b25-stream-test/libaribb25
+	url = https://github.com/tsukumijima/libaribb25.git
