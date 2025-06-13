@@ -13,3 +13,6 @@
 [submodule "Dockerfile/recpt1/recpt1"]
 	path = Dockerfile/recpt1/recpt1
 	url = https://github.com/stz2012/recpt1.git
+[submodule "Dockerfile/recdvb/recdvb"]
+	path = Dockerfile/recdvb/recdvb
+	url = https://github.com/kaikoma-soft/recdvb.git
