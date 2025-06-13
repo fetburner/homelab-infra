@@ -9,7 +9,12 @@ tuners:
   - name: PX-S1UD_T1
     types:
       - GR
-    command: recdvb --dev 0 --b25 --strip {{channel}} {{duration}} -
+    command: recdvb --dev 0 {{channel}} {{duration}} -
+
+filters:
+  decode-filter:
+    command: >-
+      arib-b25-stream-test
 
 channels:
   - name: ＮＨＫＥテレ
