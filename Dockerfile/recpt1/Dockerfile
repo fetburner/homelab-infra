@@ -1,23 +1,22 @@
+FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
+
 FROM alpine:3.22.0 AS build-image
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add autoconf automake bash clang cmake curl make pkgconfig linux-headers
+    apk add autoconf automake bash clang cmake curl make pkgconfig linux-headers libc-dev
 
 # recpt1
 WORKDIR /tmp/recpt1
 COPY ./Dockerfile/recpt1/recpt1 /tmp/recpt1
 
 WORKDIR /tmp/recpt1/recpt1
-RUN ./autogen.sh && \
+RUN --mount=type=bind,from=magicpak-image,target=/mnt \
+    ./autogen.sh && \
     ./configure && \
     make -j"$(nproc)" && \
-    make install
-
-WORKDIR /tmp/build
-COPY ./script/extractlibrary cp.sh
-RUN which recpt1 >> cplist && \
-    ./cp.sh cplist /build
+    make install && \
+    /mnt/bin/magicpak -v "$(which recpt1)" /build
 
 # final image
 FROM scratch
