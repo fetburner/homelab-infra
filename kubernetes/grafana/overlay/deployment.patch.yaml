@@ -106,7 +106,7 @@ spec:
         - name: thanos-store
           emptyDir:
             medium: Memory
-            sizeLimit: 64Mi
+            sizeLimit: 128Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
