@@ -155,3 +155,23 @@ spec:
       kind: CustomResourceDefinition
       jsonPointers:
         - /spec/preserveUnknownFields
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runner
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runner
+  project: default
+  source:
+    path: kubernetes/arc-runner
+    repoURL: https://github.com/fetburner/homelab-infra-private
+    targetRevision: HEAD
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
