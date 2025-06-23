@@ -4,7 +4,7 @@ kind: Kustomization
 helmcharts:
   - name: gha-runner-scale-set
     repo: oci://ghcr.io/actions/actions-runner-controller-charts
-    version: 0.9.2
+    version: 0.10.1
     releaseName: gha-runner-scale-set
     valuesInline:
       githubConfigUrl: https://github.com/fetburner/homelab-infra
