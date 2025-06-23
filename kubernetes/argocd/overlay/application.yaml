@@ -167,7 +167,7 @@ spec:
   project: default
   source:
     path: kubernetes/arc-runner
-    repoURL: https://github.com/fetburner/homelab-infra-private
+    repoURL: https://github.com/fetburner/homelab-infra
     targetRevision: HEAD
   syncPolicy:
     syncOptions:
