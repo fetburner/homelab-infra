@@ -1,3 +1,8 @@
+auths:
+  snmpv2c:
+    version: 2
+    community: public
+
 modules:
 # Synology
 #
