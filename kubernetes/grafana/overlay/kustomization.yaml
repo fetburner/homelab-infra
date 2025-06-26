@@ -17,9 +17,6 @@ configMapGenerator:
   - name: prometheus
     files:
       - config/prometheus.yml
-  - name: snmp-exporter-config
-    files:
-      - config/snmp.yml
   - name: bucket
     files:
       - config/bucket.yml
