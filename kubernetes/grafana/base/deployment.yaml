@@ -195,17 +195,10 @@ spec:
         app.kubernetes.io/name: snmp-exporter
     spec:
       containers:
-        - image: prom/snmp-exporter:v0.22.0
+        - image: ghcr.io/fetburner/snmp-exporter
           name: snmp-exporter
           ports:
             - containerPort: 9116
               name: snmp-exporter
-          volumeMounts:
-            - name: snmp-exporter-config
-              mountPath: /etc/snmp_exporter
           securityContext:
             readOnlyRootFilesystem: true
-      volumes:
-        - name: snmp-exporter-config
-          configMap:
-            name: snmp-exporter-config
