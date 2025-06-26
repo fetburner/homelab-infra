@@ -1,0 +1,581 @@
+-- ============================================================================
+-- AT-MAC-NOTIFICATION-MIB, Allied Telesis enterprise MIB
+--
+-- Copyright (c) 2021 by Allied Telesis, Inc.
+-- All rights reserved.
+--
+-- ===========================================================================
+
+    AT-MAC-NOTIFICATION-MIB DEFINITIONS ::= BEGIN
+
+        IMPORTS
+            modules
+                FROM AT-SMI-MIB
+            MODULE-IDENTITY, OBJECT-TYPE, Counter32, NOTIFICATION-TYPE,
+            Unsigned32, Integer32
+                FROM SNMPv2-SMI
+            TruthValue, TimeStamp, MacAddress, TEXTUAL-CONVENTION
+                FROM SNMPv2-TC
+            ifIndex
+                FROM IF-MIB;
+
+    atMac MODULE-IDENTITY
+        LAST-UPDATED    "202105180000Z"
+        ORGANIZATION    "Allied Telesis, Inc."
+        CONTACT-INFO
+            "http://www.alliedtelesis.com"
+        DESCRIPTION
+            "This MIB module is for configuration of the MAC notification
+            feature. MAC notification is a mechanism to inform monitoring
+            devices when there are MAC addresses learnt or removed from
+            the forwarding table of the monitored devices."
+
+        REVISION   "202105180000Z"
+        DESCRIPTION
+            "Initial version of this MIB module."
+
+        ::= { modules 607 }
+
+Percent ::= TEXTUAL-CONVENTION
+    STATUS current
+    DESCRIPTION
+        "An integer that is in the range of a percent value."
+    SYNTAX Integer32 (0..100)
+
+--
+-- Node definitions
+--
+
+    atMacNotifications     OBJECT IDENTIFIER
+        ::= { atMac 0 }
+    atMacChangeObjects     OBJECT IDENTIFIER
+        ::= { atMac 1 }
+    atMacMoveObjects       OBJECT IDENTIFIER
+        ::= { atMac 2 }
+    atMacThresholdObjects  OBJECT IDENTIFIER
+        ::= { atMac 3 }
+
+--**********************************************************************
+-- AT Mac Notifications
+--**********************************************************************
+
+    atMacChangeNotification NOTIFICATION-TYPE
+        OBJECTS { atMacHistMacChangeMsg, atMacHistTimestamp }
+        STATUS  current
+        DESCRIPTION
+            "This notification is sent if atMacChangeNotificationEnabled
+            is true(1) and when
+            1. there are enough MAC change events to fully occupy a maximum size
+               SNMP trap message containing 23 events.
+            2. the time elapsed from when the first MAC address change was queued is
+               greater than the wait time denoted by atMacChangeNotificationInterval
+               object."
+        ::= { atMacNotifications 1}
+
+    atMacMoveNotification NOTIFICATION-TYPE
+        OBJECTS {
+                atMacMoveAddress,
+                atMacMoveVlanId,
+                atMacMoveFromPortId,
+                atMacMoveToPortId,
+                atMacMoveTime
+                }
+        STATUS  current
+        DESCRIPTION
+            "This notification is sent when a MAC address is moved between
+             two interfaces."
+        ::= { atMacNotifications 2 }
+
+    atMacThresholdNotification  NOTIFICATION-TYPE
+        OBJECTS  {
+                atMacUtilizationInstanceId,
+                atMacUtilizationVcsMemberId,
+                atMacUtilizationBayId,
+                atMacUtilizationRate,
+                atMacThresholdLimit,
+                atMacUtilizationTime
+                 }
+        STATUS  current
+        DESCRIPTION
+             "This notification is sent when atMacUtilizationRate exceeds or equals
+              to the atMacThresholdLimit for a given atMacUtilizationInstanceId."
+        ::= { atMacNotifications 3}
+
+--**********************************************************************
+-- AT Mac Change Notification Objects
+--**********************************************************************
+
+    atMacChangeFeatureEnabled  OBJECT-TYPE
+        SYNTAX        TruthValue
+        MAX-ACCESS    read-write
+        STATUS        current
+        DESCRIPTION
+            "Indicates whether the MAC change feature is currently
+            running on the device.
+
+            Setting this object to false(2) will disable the MAC change
+            feature globally, thus disabling the feature at each
+            interface.
+
+            Setting this object to true(1) will start the MAC change
+            feature if it is not already running. Once the mac-change
+            feature is enabled, whether the feature is running at each
+            interface is controlled by the atMacChangeIfTable."
+        ::= { atMacChangeObjects 1 }
+
+    atMacChangeNotificationEnabled  OBJECT-TYPE
+        SYNTAX        TruthValue
+        MAX-ACCESS    read-write
+        STATUS        current
+        DESCRIPTION
+            "Indicates whether the MAC change notification is enabled.
+
+            Setting this object to false(2) will disable the sending of
+            atMacChangeNotification globally, but it will still archive
+            the events in the atMacHistoryTable.
+
+            Setting this object to true(1) will enable the sending of
+            atMacChangeNotification globally, and MAC change events will
+            be archived in the atMacHistoryTable."
+        ::= { atMacChangeObjects 2 }
+
+    atMacChangeNotificationInterval  OBJECT-TYPE
+        SYNTAX        Unsigned32 (0..2147483647)
+        UNITS         "seconds"
+        MAX-ACCESS    read-write
+        STATUS        current
+        DESCRIPTION
+            "This object specifies the maximum interval of time between
+            a MAC change event being queued and the generation of an
+            atMacChangeNotification by the device.
+
+            If the value of this object is equal to 0, the device will
+            send atMacChangeNotification and archive the MAC change
+            events in the atMacHistoryTable as soon as MAC addresses are
+            learnt or removed.
+
+            If the value of this object is greater than 0, the device
+            will wait for a period of time equal to the value of this
+            object before generating the atMacChangeNotification and
+            archiving the MAC change events in the atMacHistoryTable."
+        ::= { atMacChangeObjects 3 }
+
+    atMacAddressesLearnt OBJECT-TYPE
+        SYNTAX        Counter32
+        MAX-ACCESS    read-only
+        STATUS        current
+        DESCRIPTION
+            "Indicates the number of MAC addresses learnt by the device
+            in MAC change events."
+        ::= { atMacChangeObjects 4 }
+
+    atMacAddressesRemoved OBJECT-TYPE
+        SYNTAX        Counter32
+        MAX-ACCESS    read-only
+        STATUS        current
+        DESCRIPTION
+            "Indicates the number of MAC addresses removed from the
+            forwarding table in MAC change events."
+        ::= { atMacChangeObjects 5 }
+
+    atMacChangeNotificationsSent OBJECT-TYPE
+        SYNTAX         Counter32
+        MAX-ACCESS     read-only
+        STATUS         current
+        DESCRIPTION
+            "Indicates the number of atMacChangeNotification sent out by
+            the device."
+        ::= { atMacChangeObjects 6 }
+
+    atMacHistTableMaxLength OBJECT-TYPE
+        SYNTAX          Unsigned32 (0..500)
+        UNITS           "entries"
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION
+            "The upper limit on the number of entries that the
+            atMacHistoryTable may contain. A value of 0 will prevent any
+            history from being retained.
+
+            When this table is full, the oldest entry will be deleted
+            and a new one will be created."
+        DEFVAL  { 1 }
+        ::= { atMacChangeObjects 7 }
+
+    atMacHistoryTable OBJECT-TYPE
+        SYNTAX     SEQUENCE OF AtMacHistoryEntry
+        MAX-ACCESS not-accessible
+        STATUS     current
+        DESCRIPTION
+            "This table will archive the MAC change events generated by
+            this device.
+
+            The MAC change events are archived here even if the
+            atMacChangeNotification is not actually sent."
+        ::= { atMacChangeObjects 8 }
+
+    atMacHistoryEntry OBJECT-TYPE
+        SYNTAX       AtMacHistoryEntry
+        MAX-ACCESS not-accessible
+        STATUS     current
+        DESCRIPTION
+            "A MAC change message that was generated by this device.
+            Each entry is indexed by a message index."
+        INDEX   { atMacHistIndex }
+        ::= { atMacHistoryTable 1 }
+
+    AtMacHistoryEntry ::=
+        SEQUENCE {
+          atMacHistIndex
+                    Unsigned32,
+          atMacHistMacChangeMsg
+                    OCTET STRING,
+          atMacHistTimestamp
+                    TimeStamp
+        }
+
+    atMacHistIndex OBJECT-TYPE
+        SYNTAX          Unsigned32 (1..4294967295)
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+            "An index that uniquely identifies a MAC change event
+            previously generated by the device. This index starts at 1
+            and increases by one when a MAC change event occurs.
+
+            When the index would increase beyond the maximum integer
+            value of 4294967295, the agent will clear the existing
+            events, and the indices restart from 1."
+        ::= { atMacHistoryEntry 1 }
+
+    atMacHistMacChangeMsg OBJECT-TYPE
+        SYNTAX        OCTET STRING (SIZE(1..254))
+        MAX-ACCESS    read-only
+        STATUS        current
+        DESCRIPTION
+            "This object contains the information of a MAC change
+            notification event.
+
+            It consists of several tuples packed together in the format
+            of '<tuple1><tuple2>...<tupleN><END>'.
+
+            Each tuple consist of 11 octets in the format of
+            '<operation><VLAN><MAC><dot1dBasePort>' where
+
+            <operation> is of size 1 octet and supports the values:
+              0 - End of MIB object. (Used only by <END> marker)
+              1 - MAC learnt.
+              2 - MAC removed.
+
+            <VLAN> is VLAN number of the VLAN which the MAC address
+            belonged to and has size of 2 octet.
+
+            <MAC> is the Layer 2 MAC Address and has size of 6 octets.
+
+            <dot1dBasePort> is the value of dot1dBasePort for the
+            interface from which the MAC address is learnt or removed,
+            and has size of 2 octets.
+
+            The <END> marker is of size 1 octet and is always set to 0
+            so that it is identifiable from a regular MAC change
+            operation."
+        ::= { atMacHistoryEntry 2 }
+
+    atMacHistTimestamp  OBJECT-TYPE
+        SYNTAX          TimeStamp
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+            "The value of sysUpTime when the atMacChangeNotification
+            containing the information denoted by the
+            atMacHistMacChangeMsg object in this entry was generated."
+        ::= { atMacHistoryEntry 3 }
+
+    atMacChangeIfTable OBJECT-TYPE
+        SYNTAX        SEQUENCE OF AtMacChangeIfEntry
+        MAX-ACCESS    not-accessible
+        STATUS        current
+        DESCRIPTION
+            "This table enables or disables the generation of MAC change
+            events at each interface when MAC addresses are learnt or
+            removed."
+        ::= { atMacChangeObjects 9 }
+
+    atMacChangeIfEntry OBJECT-TYPE
+        SYNTAX        AtMacChangeIfEntry
+        MAX-ACCESS    not-accessible
+        STATUS        current
+       DESCRIPTION
+            "Each entry contains the configuration for enabling the
+            generation of MAC change events at each interface that
+            supports this feature."
+        INDEX { ifIndex }
+        ::= { atMacChangeIfTable 1 }
+
+    AtMacChangeIfEntry  ::= SEQUENCE {
+        atMacAddrLearntNotificationEnabled    TruthValue,
+        atMacAddrRemovedNotificationEnabled   TruthValue
+    }
+
+    atMacAddrLearntNotificationEnabled OBJECT-TYPE
+        SYNTAX        TruthValue
+        MAX-ACCESS    read-write
+        STATUS        current
+        DESCRIPTION
+            "Indicates whether this interface is enabled to generate
+            MAC change events when it learns a new MAC address. This
+            variable has no effect when the value of
+            atMacChangeFeatureEnabled object is false(2).
+
+            Setting this object to true(1) enables the generation of
+            MAC change events when this interface learns a new MAC
+            address.
+
+            Setting this object to false(2) disables the generation of
+            MAC change events when this interface learns a new MAC
+            address."
+        DEFVAL { false }
+        ::= { atMacChangeIfEntry 1 }
+
+    atMacAddrRemovedNotificationEnabled OBJECT-TYPE
+        SYNTAX        TruthValue
+        MAX-ACCESS    read-write
+        STATUS        current
+        DESCRIPTION
+            "Indicates whether this interface is enabled to generate
+            MAC change events when a MAC address which it learnt
+            previously is removed from the forwarding table. This
+            variable has no effect when the value of
+            atMacChangeFeatureEnabled object is false(2).
+
+            Setting this object to true(1) enables the generation of
+            MAC change events when a MAC address which this interface
+            learnt previously is removed from the forwarding table.
+
+            Setting this object to false(2) disables the generation of
+            MAC change events when a MAC address which this interface
+            learnt previously is removed from the forwarding table."
+        DEFVAL { false }
+        ::= { atMacChangeIfEntry 2 }
+
+--*********************************************************************
+-- AT Mac Move Notification Objects
+--*********************************************************************
+
+    atMacMoveNotificationEnabled OBJECT-TYPE
+         SYNTAX          TruthValue
+         MAX-ACCESS      read-write
+         STATUS          current
+         DESCRIPTION
+             "Specifies whether atMacMoveNotification will or will not be sent
+             when the MAC addresses are moved between the interfaces.
+
+             Setting this object to true(1) enables the sending of
+             atMacMoveNotification by the device.
+
+             Setting this object to false(2) disables the sending of
+             atMacMoveNotification by the device."
+        ::= { atMacMoveObjects 1 }
+
+    atMacMoveAddress OBJECT-TYPE
+         SYNTAX          MacAddress
+         MAX-ACCESS      accessible-for-notify
+         STATUS          current
+         DESCRIPTION
+             "Indicates the MAC address that is moved between atMacMoveFromPortId
+             and atMacMoveToPortId on atMacMoveVlanId.
+
+             This object is instantiated only when atMacMoveNotificationEnabled
+             is true(1) and a MAC address is moved between the interfaces."
+        ::= { atMacMoveObjects 2 }
+
+    atMacMoveVlanId OBJECT-TYPE
+         SYNTAX          Unsigned32 (0..65536)
+         MAX-ACCESS      accessible-for-notify
+         STATUS          current
+         DESCRIPTION
+             "Indicates the VLAN on which the atMacMoveAddress is moved from
+             atMacMoveFromPortId to atMacMoveToPortId.
+
+             This object is instantiated only when atMacMoveNotificationEnabled
+             is true(1) and a MAC address is moved between the interfaces."
+         ::= { atMacMoveObjects 3 }
+
+    atMacMoveFromPortId OBJECT-TYPE
+         SYNTAX          Integer32 (1..65535)
+         MAX-ACCESS      accessible-for-notify
+         STATUS          current
+         DESCRIPTION
+             "The value of dot1dBasePort for the bridge port from which the
+             atMacMoveAddress is moved to atMacMoveToPortId on atMacMoveVlanId.
+
+             This object is instantiated only when atMacMoveNotificationEnabled
+             is true(1) and a MAC address is moved between the interfaces."
+         REFERENCE
+               "dot1dBasePort is defined in RFC1493."
+        ::= { atMacMoveObjects 4 }
+
+    atMacMoveToPortId OBJECT-TYPE
+         SYNTAX          Integer32 (1..65535)
+         MAX-ACCESS      accessible-for-notify
+         STATUS          current
+         DESCRIPTION
+             "The value of dot1dBasePort for the bridge port to which the
+             atMacMoveAddress is moved from atMacMoveFromPortId on atMacMoveVlanId.
+
+             This object is instantiated only when atMacMoveNotificationEnabled is
+             true(1) and a MAC address is moved between the interfaces."
+         REFERENCE
+             "dot1dBasePort is defined in RFC1493."
+        ::= { atMacMoveObjects 5 }
+
+    atMacMoveTime OBJECT-TYPE
+         SYNTAX          TimeStamp
+         MAX-ACCESS      accessible-for-notify
+         STATUS          current
+         DESCRIPTION
+             "The value of sysUpTime when a atMacMoveAddress is moved between
+             atMacMoveFromPortId and atMacMoveToPortId.
+
+             This object is instantiated only when atMacMoveNotificationEnabled
+             is true(1) and a MAC address is moved between the interfaces."
+        ::= { atMacMoveObjects 6 }
+
+--*********************************************************************
+-- AT Mac Threshold Notification Objects
+--*********************************************************************
+
+    atMacThresholdNotificationEnabled  OBJECT-TYPE
+        SYNTAX        TruthValue
+        MAX-ACCESS    read-write
+        STATUS        current
+        DESCRIPTION
+             "Specifies whether atMacThresholdNotification will or will not be
+             sent when the forwarding table utilization exceeds or equals to
+             atMacThresholdLimit.
+
+             Setting this object to true(1) enables the sending of
+             atMacThresholdNotification by the device.
+
+             Setting this object to false(2) disables the sending of
+             atMacThresholdNotification by the device."
+        ::= { atMacThresholdObjects 1 }
+
+    atMacThresholdLimit  OBJECT-TYPE
+        SYNTAX        Percent
+        MAX-ACCESS    read-write
+        STATUS        current
+        DESCRIPTION
+             "Indicate the threshold limit of the forwarding table utilization."
+        ::= { atMacThresholdObjects 2 }
+
+    atMacThresholdInterval  OBJECT-TYPE
+        SYNTAX        Unsigned32 (120..2147483647)
+        UNITS         "seconds"
+        MAX-ACCESS    read-write
+        STATUS        current
+        DESCRIPTION
+            "The time interval at which forwarding table utilization is compared
+            against atMacThresholdLimit."
+      ::= { atMacThresholdObjects 3 }
+
+    atMacUtilizationTable OBJECT-TYPE
+        SYNTAX     SEQUENCE OF AtMacUtilizationEntry
+        MAX-ACCESS not-accessible
+        STATUS     current
+        DESCRIPTION
+            "atMacUtilizationTable specifies the forwarding table utilization
+            information. This table is instantiated only when atMacThresholdEnabled
+            is true(1).
+
+            Entries in this table are updated at the end of every
+            atMacThresholdInterval."
+        ::= { atMacThresholdObjects 4 }
+
+    atMacUtilizationEntry OBJECT-TYPE
+        SYNTAX       AtMacUtilizationEntry
+        MAX-ACCESS not-accessible
+        STATUS     current
+            DESCRIPTION
+            "A conceptual row containing forwarding table utilization maintained by
+            switching engine (identified by atMacUtilizationInstanceId).
+
+            Each switching engine managed by this MIB module can have at least one
+            entry in this table."
+        INDEX   { atMacUtilizationInstanceId }
+        ::= { atMacUtilizationTable 1 }
+
+    AtMacUtilizationEntry ::=
+        SEQUENCE {
+              atMacUtilizationInstanceId
+                    Unsigned32,
+              atMacUtilizationVcsMemberId
+                    Unsigned32,
+              atMacUtilizationBayId
+                    Unsigned32,
+              atMacUtilizationEntries
+                    Unsigned32,
+              atMacUtilizationRate
+                    Percent,
+              atMacUtilizationTime
+                    TimeStamp
+                }
+
+    atMacUtilizationInstanceId OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+            "Represents the instance of the physical mac address forwarding table."
+        ::= { atMacUtilizationEntry 1 }
+
+    atMacUtilizationVcsMemberId OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+            "Represents the Virtual Chassis Stacking member of the board of the physical
+             mac address forwarding table, in a VCS enviroment. Otherwise it always
+             represents a stand alone unit itself."
+        ::= { atMacUtilizationEntry 2 }
+
+    atMacUtilizationBayId OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+            "Represents the physical position of the board of the physical mac address
+             forwarding tables."
+        ::= { atMacUtilizationEntry 3 }
+
+    atMacUtilizationEntries OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+            "Indicates the number of entries present in the forwarding table for the
+            given atMacUtilizationInstanceId calculated at the end of atMacThresholdInterval."
+        ::= { atMacUtilizationEntry 4 }
+
+    atMacUtilizationRate OBJECT-TYPE
+        SYNTAX          Percent
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+            "Indicates the utilization of the forwarding table for the given
+             atMacUtilizationInstanceId calculated at the end of atMacThresholdInterval."
+        ::= { atMacUtilizationEntry 5 }
+
+    atMacUtilizationTime OBJECT-TYPE
+        SYNTAX          TimeStamp
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+            "Indicates the sysUptime at which the atMacUtilizationRate is updated."
+        ::= { atMacUtilizationEntry 6 }
+
+  END
+
+--
+-- at-mac-notification.mib
+--

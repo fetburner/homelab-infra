@@ -1,0 +1,121 @@
+-- ============================================================================
+-- AT-MRP-MIB, Allied Telesis enterprise MIB: Media Redundancy Protocol(MRP)
+--
+-- Copyright (c) 2025 by Allied Telesis, Inc.
+-- All rights reserved.
+--
+-- ============================================================================
+
+
+    AT-MRP-MIB DEFINITIONS ::= BEGIN
+
+        IMPORTS
+            modules
+                FROM AT-SMI-MIB
+            IpAddress, OBJECT-TYPE, MODULE-IDENTITY, NOTIFICATION-TYPE
+                FROM SNMPv2-SMI
+            DisplayString
+                FROM SNMPv2-TC;
+
+
+        atMrp MODULE-IDENTITY
+            LAST-UPDATED "202501060000Z"
+            ORGANIZATION
+                "Allied Telesis, Inc"
+            CONTACT-INFO
+                "http://www.alliedtelesis.com"
+            DESCRIPTION
+                "This MIB file contains definitions of managed objects for Media
+                Redundancy Protocol in AlliedWare Plus."
+            REVISION "202501060000Z"
+            DESCRIPTION
+                "Initial Revision"
+            ::= { modules 608 }
+
+
+--
+-- Node definitions
+--
+
+        atMrpEvents OBJECT IDENTIFIER ::= { atMrp 0 }
+
+        atMrpRingStatusTrap NOTIFICATION-TYPE
+            OBJECTS { atMrpDomainID, atMrpRingState }
+            STATUS current
+            DESCRIPTION
+                "MRP Ring status trap is generated when the ring state changes from CLOSED to OPEN or vice-versa."
+            ::= { atMrpEvents 1 }
+
+        atMrpManagerStatusTrap NOTIFICATION-TYPE
+            OBJECTS { atMrpDomainID, atMrpManagerState }
+            STATUS current
+            DESCRIPTION
+                "MRP Manager status trap is generated when the manager state changes from single to multiple or vice-versa."
+            ::= { atMrpEvents 2 }
+
+        atMrpVariablesTable OBJECT-TYPE
+            SYNTAX SEQUENCE OF AtMrpVariablesEntry
+            MAX-ACCESS not-accessible
+            STATUS current
+            DESCRIPTION
+                "This table contains rows of MRP information."
+            ::= { atMrp 1 }
+
+        atMrpVariablesEntry OBJECT-TYPE
+            SYNTAX AtMrpVariablesEntry
+            MAX-ACCESS not-accessible
+            STATUS current
+            DESCRIPTION
+                "A set of parameters that describe the MRP features."
+            INDEX { atMrpDomainID }
+            ::= { atMrpVariablesTable 1 }
+
+        AtMrpVariablesEntry ::=
+            SEQUENCE {
+                atMrpDomainID
+                    OCTET STRING,
+                atMrpRingState
+                    INTEGER,
+                atMrpManagerState
+                    INTEGER
+             }
+
+        atMrpDomainID OBJECT-TYPE
+            SYNTAX OCTET STRING (SIZE (1..16))
+            MAX-ACCESS read-only
+            STATUS current
+            DESCRIPTION
+                "MRP ring domain Id."
+            ::= { atMrpVariablesEntry 1 }
+
+        atMrpRingState OBJECT-TYPE
+            SYNTAX INTEGER
+                {
+                ringOpen(1),
+                ringClosed(2)
+                }
+            MAX-ACCESS read-only
+            STATUS current
+            DESCRIPTION
+                "The ring state is either opened or closed."
+            ::= { atMrpVariablesEntry 2 }
+
+        atMrpManagerState OBJECT-TYPE
+            SYNTAX INTEGER
+                {
+                managerSingle(1),
+                managerMultiple(2)
+                }
+            MAX-ACCESS read-only
+            STATUS current
+            DESCRIPTION
+                "The MRP Managers in the ring which is either single manager or
+                multiple managers."
+            ::= { atMrpVariablesEntry 3 }
+
+    END
+
+--
+-- at-mrp.mib
+--
+
