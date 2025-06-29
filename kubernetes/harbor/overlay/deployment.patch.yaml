@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-core
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-portal
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-registry
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-jobservice
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-nginx
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
