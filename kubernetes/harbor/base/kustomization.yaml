@@ -9,6 +9,8 @@ helmcharts:
     valuesInline:
       expose:
         type: clusterIP
+        tls:
+          enabled: false
       persistence:
         persistentVolumeClaim:
           redis:
