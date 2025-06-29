@@ -6,3 +6,17 @@ helmcharts:
     repo: https://helm.goharbor.io
     version: v1.17.1
     releaseName: harbor
+    valuesInline:
+      persistence:
+        persistentVolumeClaim:
+          redis:
+            storageClass: rook-ceph-block
+          trivy:
+            storageClass: rook-ceph-block
+          registry:
+            storageClass: rook-ceph-block
+          database:
+            storageClass: rook-ceph-block
+          jobservice:
+            jobLog:
+              storageClass: rook-ceph-block
