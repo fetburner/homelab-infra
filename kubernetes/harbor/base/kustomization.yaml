@@ -7,6 +7,8 @@ helmcharts:
     version: v1.17.1
     releaseName: harbor
     valuesInline:
+      expose:
+        type: clusterIP
       persistence:
         persistentVolumeClaim:
           redis:
