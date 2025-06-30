@@ -5,6 +5,7 @@ namespace: harbor
 
 resources:
   - ../base
+  - deployment.yaml
 
 patches:
   - path: deployment.patch.yaml
