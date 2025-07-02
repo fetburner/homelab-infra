@@ -9,7 +9,7 @@ helmcharts:
     valuesInline:
       externalURL: https://harbor.fetburner.dev
       expose:
-        type: clusterIP
+        type: nodePort
         tls:
           enabled: false
       persistence:
