@@ -195,3 +195,23 @@ spec:
     automated:
       prune: true
       selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rancher
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cattle-system
+  project: default
+  source:
+    path: kubernetes/rancher
+    repoURL: https://github.com/fetburner/homelab-infra
+    targetRevision: HEAD
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
