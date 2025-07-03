@@ -6,6 +6,7 @@ helmcharts:
     repo: https://releases.rancher.com/server-charts/stable
     version: v2.11.3
     releaseName: rancher
+    kubeVersion: 1.32.5
     valuesInline:
       ingress:
         enabled: false
