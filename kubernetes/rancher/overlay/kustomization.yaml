@@ -5,3 +5,5 @@ namespace: cattle-system
 
 resources:
   - ../base
+  - deployment.yaml
+  - sealedsecret.yaml
