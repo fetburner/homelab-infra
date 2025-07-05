@@ -6,7 +6,7 @@ FROM node:18-alpine3.21 AS node-image
 RUN --mount=type=bind,from=magicpak-image,target=/mnt \
     --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add gcc libc-dev && \
+    apk --update-cache add gcc libc-dev ca-certificates && \
     /mnt/bin/magicpak -v "$(which node)" /build --include '/usr/lib/libssl*' --include '/usr/lib/libcrypto*' && \
     cp --archive --parents --no-dereference /etc/ssl /build
 
