@@ -78,24 +78,6 @@ spec:
               mountPath: /tmp/app/config
             - name: epgstation-raw-config
               mountPath: /app/config
-        - name: interpolate-proxysql-config
-          image: ghcr.io/fetburner/envsubst
-          command:
-            - "sh"
-            - "-c"
-            - |
-              cp --archive --parents --no-dereference /etc/proxysql /tmp &&
-              for file in $(find /etc/proxysql -type f); do
-                envsubst < $file > /tmp/$file;
-              done
-          envFrom:
-            - secretRef:
-                name: tidb-serverless
-          volumeMounts:
-            - name: proxysql-config
-              mountPath: /tmp/etc/proxysql
-            - name: proxysql-raw-config
-              mountPath: /etc/proxysql
       volumes:
         - name: epgstation-graphics-driver
           hostPath:
@@ -104,21 +86,10 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 16Mi
-        - name: proxysql-data
-          emptyDir:
-            medium: Memory
-            sizeLimit: 1Mi
         - name: epgstation-raw-config
           configMap:
             name: epgstation-epgstation
         - name: epgstation-config
-          emptyDir:
-            medium: Memory
-            sizeLimit: 1Mi
-        - name: proxysql-raw-config
-          configMap:
-            name: epgstation-proxysql
-        - name: proxysql-config
           emptyDir:
             medium: Memory
             sizeLimit: 1Mi

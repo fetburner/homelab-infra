@@ -4,11 +4,13 @@ mirakurunPath: http://mirakc:40772/
 
 dbtype: mysql
 mysql:
-    host: 127.0.0.1
-    port: 6033
+    host: gateway01.ap-northeast-1.prod.aws.tidbcloud.com
+    port: 4000
     user: '${MYSQL_USER}'
     password: '${MYSQL_PASSWORD}'
     database: epgstation
+    ssl:
+      rejectUnauthorized: true
 
 epgUpdateIntervalTime: 360
 
