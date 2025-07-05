@@ -19,9 +19,6 @@ configMapGenerator:
   - name: epgstation-mirakc
     files:
       - config/mirakc/config.yml
-  - name: epgstation-proxysql
-    files:
-      - config/proxysql/config.cnf
   - name: epgstation-epgstation
     files:
       - config/epgstation/config.yml

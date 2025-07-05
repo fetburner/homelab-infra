@@ -68,30 +68,8 @@ spec:
           securityContext:
             privileged: true
             readOnlyRootFilesystem: true
-        - name: proxysql
-          image: proxysql/proxysql:2.7.2-centos
-          command:
-            - "proxysql"
-          args:
-            - "-f"
-            - "--idle-threads"
-            - "--datadir"
-            - "/var/lib/proxysql"
-            - "--config"
-            - "/etc/proxysql/config.cnf"
-          ports:
-            - containerPort: 6033
-          volumeMounts:
-            - name: proxysql-data
-              mountPath:  /var/lib/proxysql
-            - name: proxysql-config
-              mountPath: /etc/proxysql
-          securityContext:
-            readOnlyRootFilesystem: true
       imagePullSecrets:
         - name: dockerconfigjson-ghcr
       volumes:
-        - name: proxysql-data
-          emptyDir:
         - name: epgstation-upload
           emptyDir:
