@@ -10,6 +10,9 @@ helmcharts:
       externalURL: https://harbor.fetburner.dev
       expose:
         type: nodePort
+        tls:
+          auto:
+            commonName: harbor.fetburner.dev
         nodePort:
           ports:
             http:
