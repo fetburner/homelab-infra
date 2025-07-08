@@ -26,9 +26,11 @@ helmcharts:
           trivy:
             storageClass: rook-ceph-block
           registry:
-            storageClass: rook-ceph-block
+            accessMode: ReadWriteMany
+            storageClass: rook-cephfs
           database:
             storageClass: rook-ceph-block
           jobservice:
             jobLog:
-              storageClass: rook-ceph-block
+              accessMode: ReadWriteMany
+              storageClass: rook-cephfs
