@@ -8,6 +8,7 @@ resources:
   - storageclass.yaml
   - cephblockpool.yaml
   - cephobjectstore.yaml
+  - cephfilesystem.yaml
 
 patches:
   - path: cluster.patch.yaml
