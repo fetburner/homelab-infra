@@ -1,13 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cloudflared
-spec:
-  replicas: 1
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: grafana
 spec:
   replicas: 1

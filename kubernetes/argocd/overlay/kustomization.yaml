@@ -6,7 +6,6 @@ namespace: argocd
 resources:
   - ../base
   - sealedsecret.yaml
-  - deployment.yaml
   - application.yaml
 
 patches:

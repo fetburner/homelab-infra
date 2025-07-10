@@ -5,8 +5,6 @@ namespace: harbor
 
 resources:
   - ../base
-  - deployment.yaml
-  - sealedsecret.yaml
 
 patches:
   - path: deployment.patch.yaml
