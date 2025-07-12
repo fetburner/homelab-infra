@@ -98,8 +98,6 @@ spec:
       volumes:
         - name: thanos-store
           emptyDir:
-            medium: Memory
-            sizeLimit: 128Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
