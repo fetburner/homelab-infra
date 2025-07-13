@@ -24,6 +24,7 @@ spec:
           image: cloudflare/cloudflared:2025.7.0
           args:
             - tunnel
+            - --no-autoupdate
             - --metrics
             - 0.0.0.0:2000
             - run
