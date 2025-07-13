@@ -26,6 +26,7 @@ spec:
       containers:
         - name: cloudflared
           image: cloudflare/cloudflared:2025.7.0
+          imagePullPolicy: Always
           args:
             - tunnel
             - --no-autoupdate
