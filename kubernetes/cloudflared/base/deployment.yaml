@@ -19,6 +19,10 @@ spec:
         app.kubernetes.io/name: cloudflared
         app.kubernetes.io/part-of: cloudflared
     spec:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.ping_group_range
+            value: "65532 65532"
       containers:
         - name: cloudflared
           image: cloudflare/cloudflared:2025.7.0
