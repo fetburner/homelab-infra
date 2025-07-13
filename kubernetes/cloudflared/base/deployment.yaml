@@ -20,6 +20,8 @@ spec:
         app.kubernetes.io/part-of: cloudflared
     spec:
       securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
         sysctls:
           - name: net.ipv4.ping_group_range
             value: "65532 65532"
