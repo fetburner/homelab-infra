@@ -24,12 +24,24 @@ spec:
           image: cloudflare/cloudflared:2025.7.0
           args:
             - tunnel
+            - --metrics
+            - 0.0.0.0:2000
             - run
+          ports:
+            - name: metrics
+              containerPort: 2000
           envFrom:
             - secretRef:
                 name: tunnel-token
           securityContext:
             readOnlyRootFilesystem: true
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            failureThreshold: 1
+            initialDelaySeconds: 10
+            periodSeconds: 10
           resources:
             requests:
               ephemeral-storage: 50M
