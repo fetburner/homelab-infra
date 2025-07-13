@@ -18,6 +18,10 @@ spec:
         app.kubernetes.io/component: cloudflared
         app.kubernetes.io/name: cloudflared
         app.kubernetes.io/part-of: cloudflared
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '2000'
+        prometheus.io/path: /metrics
     spec:
       securityContext:
         runAsUser: 10001
