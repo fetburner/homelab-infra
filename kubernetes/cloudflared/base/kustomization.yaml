@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - networkpolicy.yaml
+  - poddisruptionbudget.yaml
