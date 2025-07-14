@@ -41,6 +41,8 @@ metadata:
     app.kubernetes.io/part-of: grafana
   name: thanos-sidecar
 spec:
+  type: ClusterIP
+  clusterIP: None
   ports:
   - name: thanos-sidecar
     port: 10091
