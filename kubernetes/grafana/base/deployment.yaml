@@ -48,8 +48,9 @@ spec:
         app.kubernetes.io/name: thanos-store-gateway
     spec:
       containers:
-        - image: thanosio/thanos:v0.38.0
-          name: thanos-store-gataway
+        - name: thanos-store-gataway
+          image: thanosio/thanos:v0.38.0
+          imagePullPolicy: Always
           args:
             - store
             - --grpc-address=0.0.0.0:10091
