@@ -21,6 +21,7 @@ spec:
           containers:
             - name: epgstation-mysqldump
               image: mysql:8.4
+              imagePullPolicy: Always
               command: ["/bin/sh"]
               args: ["-c", "/usr/bin/mysqldump -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_HOST} ${MYSQL_DATABASE} > /backup/`date +%Y%m%d`-epgstation.sql"]
               envFrom:
