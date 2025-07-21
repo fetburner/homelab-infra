@@ -15,6 +15,9 @@ spec:
           labels:
             app.kubernetes.io/name: epgstation-mysqldump
         spec:
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
           containers:
             - name: epgstation-mysqldump
               image: mysql:8.4
