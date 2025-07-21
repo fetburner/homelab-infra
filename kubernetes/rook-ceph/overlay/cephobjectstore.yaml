@@ -12,7 +12,6 @@ spec:
     failureDomain: host
     replicated:
       size: 3
-  preservePoolsOnDelete: false
   gateway:
     port: 80
     instances: 2

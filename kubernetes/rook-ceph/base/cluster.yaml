@@ -33,9 +33,7 @@ spec:
   # This means Ceph's status could be degraded and we don't recommend upgrading but you might decide otherwise
   # Use at your OWN risk
   # To understand Rook's upgrade process of Ceph, read https://rook.io/docs/rook/latest/ceph-upgrade.html#ceph-version-upgrades
-  skipUpgradeChecks: false
   # Whether or not continue if PGs are not clean during an upgrade
-  continueUpgradeAfterChecksEvenIfNotHealthy: false
   # WaitTimeoutForHealthyOSDInMinutes defines the time (in minutes) the operator would wait before an OSD can be stopped for upgrade or restart.
   # If the timeout exceeds and OSD is not ok to stop, then the operator would skip upgrade for the current OSD and proceed with the next one
   # if `continueUpgradeAfterChecksEvenIfNotHealthy` is `false`. If `continueUpgradeAfterChecksEvenIfNotHealthy` is `true`, then operator would
@@ -137,7 +135,6 @@ spec:
 
   # enable the crash collector for ceph daemon crash collection
   crashCollector:
-    disable: false
     # Uncomment daysToRetain to prune ceph crash entries older than the
     # specified number of days.
     #daysToRetain: 30
@@ -167,9 +164,6 @@ spec:
       # iteration overwrite N times instead of the default (1)
       # takes an integer value
       iteration: 1
-    # allowUninstallWithVolumes defines how the uninstall should be performed
-    # If set to true, cephCluster deletion does not wait for the PVs to be deleted.
-    allowUninstallWithVolumes: false
   # To control where various services will be scheduled by kubernetes, use the placement configuration sections below.
   # The example under 'all' would have all services scheduled on kubernetes nodes labeled with 'role=storage-node' and
   # tolerate taints with a key of 'storage-node'.
@@ -252,7 +246,6 @@ spec:
   #   exporter:
   #   cmd-reporter:
   # The option to automatically remove OSDs that are out and are safe to destroy.
-  removeOSDsIfOutAndSafeToRemove: false
   priorityClassNames:
     #all: rook-ceph-default-priority-class
     mon: system-node-critical
@@ -260,7 +253,6 @@ spec:
     mgr: system-cluster-critical
     #crashcollector: rook-ceph-crashcollector-priority-class
   storage: # cluster level storage configuration and selection
-    useAllNodes: true
     useAllDevices: true
     #deviceFilter:
     config:
@@ -270,8 +262,6 @@ spec:
       # osdsPerDevice: "1" # this value can be overridden at the node or device level
       # encryptedDevice: "true" # the default value for this option is "false"
       # deviceClass: "myclass" # specify a device class for OSDs in the cluster
-    allowDeviceClassUpdate: false # whether to allow changing the device class of an OSD after it is created
-    allowOsdCrushWeightUpdate: false # whether to allow resizing the OSD crush weight after osd pvc is increased
     # Individual nodes and their config can be specified as well, but 'useAllNodes' above must be set to false. Then, only the named
     # nodes below will be used as storage resources.  Each node's 'name' field should match their 'kubernetes.io/hostname' label.
     # nodes:
@@ -287,9 +277,7 @@ spec:
     #     deviceFilter: "^sd."
     # Whether to always schedule OSD pods on nodes declared explicitly in the "nodes" section, even if they are
     # temporarily not schedulable. If set to true, consider adding placement tolerations for unschedulable nodes.
-    scheduleAlways: false
     # when onlyApplyOSDPlacement is false, will merge both placement.All() and placement.osd
-    onlyApplyOSDPlacement: false
     # Time for which an OSD pod will sleep before restarting, if it stopped due to flapping
     # flappingRestartIntervalHours: 24
     # The ratio at which Ceph should block IO if the OSDs are too full. The default is 0.95.
@@ -310,7 +298,6 @@ spec:
     # A duration in minutes that the operator will wait for the placement groups to become healthy (active+clean) after a drain was completed and OSDs came back up.
     # Operator will continue with the next drain if the timeout exceeds. It only works if `managePodBudgets` is `true`.
     # No values or 0 means that the operator will wait until the placement groups are healthy before unblocking the next drain.
-    pgHealthCheckTimeout: 0
 
   # csi defines CSI Driver settings applied per cluster.
   csi:
@@ -333,27 +320,18 @@ spec:
   healthCheck:
     daemonHealth:
       mon:
-        disabled: false
         interval: 45s
       osd:
-        disabled: false
-        interval: 60s
+        interval: 1m
       status:
-        disabled: false
-        interval: 60s
+        interval: 1m
     # Change pod liveness probe timing or threshold values. Works for all mon,mgr,osd daemons.
     livenessProbe:
       mon:
-        disabled: false
       mgr:
-        disabled: false
       osd:
-        disabled: false
     # Change pod startup probe timing or threshold values. Works for all mon,mgr,osd daemons.
     startupProbe:
       mon:
-        disabled: false
       mgr:
-        disabled: false
       osd:
-        disabled: false
