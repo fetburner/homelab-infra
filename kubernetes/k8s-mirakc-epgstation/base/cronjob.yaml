@@ -8,6 +8,7 @@ metadata:
   name: epgstation-mysqldump
 spec:
   schedule: "0 0 * * *"
+  startingDeadlineSeconds: 120
   jobTemplate:
     spec:
       template:
