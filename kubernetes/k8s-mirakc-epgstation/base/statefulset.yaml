@@ -31,6 +31,7 @@ spec:
               mountPath: /mirakc-config
           securityContext:
             privileged: true
+            readOnlyRootFilesystem: true
       imagePullSecrets:
         - name: dockerconfigjson-ghcr
       volumes:
