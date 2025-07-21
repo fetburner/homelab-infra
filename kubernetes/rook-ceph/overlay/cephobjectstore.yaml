@@ -7,11 +7,11 @@ spec:
   metadataPool:
     failureDomain: host
     replicated:
-      size: 2
+      size: 3
   dataPool:
     failureDomain: host
     replicated:
-      size: 2
+      size: 3
   preservePoolsOnDelete: false
   gateway:
     port: 80
