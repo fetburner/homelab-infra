@@ -18,6 +18,7 @@ spec:
       containers:
         - name: nginx
           image: nginx:1.28.0-alpine-slim
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           volumeMounts:
