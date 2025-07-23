@@ -1,6 +1,6 @@
 FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
 
-FROM alpine:3.22.0 AS build-image
+FROM alpine:3.22.1 AS build-image
 
 RUN --mount=type=bind,from=magicpak-image,target=/mnt \
     --mount=type=cache,target=/var/cache/apk,sharing=locked \
