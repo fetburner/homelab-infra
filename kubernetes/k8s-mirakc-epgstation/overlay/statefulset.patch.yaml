@@ -55,6 +55,15 @@ spec:
         kubernetes.io/arch: amd64
       containers:
         - name: epgstation
+          resources:
+            requests:
+              cpu: 0.1
+              memory: 256M
+              ephemeral-storage: 1G
+            limits:
+              cpu: 2
+              memory: 2G
+              ephemeral-storage: 1G
           volumeMounts:
             - name: epgstation-graphics-driver
               mountPath: /dev/dri
