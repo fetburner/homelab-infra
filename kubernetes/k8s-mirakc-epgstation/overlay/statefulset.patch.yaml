@@ -17,6 +17,15 @@ spec:
               mountPath: /dev/dvb
             - name: epgstation-mirakc-epg
               mountPath: /var/lib/mirakc/epg
+          resources:
+            requests:
+              cpu: 0.1
+              memory: 32M
+              ephemeral-storage: 50M
+            limits:
+              cpu: 2
+              memory: 256M
+              ephemeral-storage: 50M
       volumes:
         - name: mirakc-tuner
           hostPath:
