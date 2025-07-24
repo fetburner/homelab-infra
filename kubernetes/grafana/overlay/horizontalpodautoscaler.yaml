@@ -20,3 +20,26 @@ spec:
       target:
         type: Utilization
         averageUtilization: 50
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app.kubernetes.io/component: snmp-exporter
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/part-of: grafana
+  name: snmp-exporter
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: snmp-exporter
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
