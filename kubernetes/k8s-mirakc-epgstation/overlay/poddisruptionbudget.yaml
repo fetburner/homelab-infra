@@ -1,0 +1,13 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: nginx
+    app.kubernetes.io/name: epgstation-nginx
+    app.kubernetes.io/part-of: epgstation
+  name: thanos-sidecar
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: epgstation-nginx
