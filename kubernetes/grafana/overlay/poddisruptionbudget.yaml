@@ -67,3 +67,17 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: thanos-querier
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: thanos-store-gateway
+    app.kubernetes.io/name: thanos-store-gateway
+    app.kubernetes.io/part-of: grafana
+  name: thanos-store-gateway
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thanos-store-gateway
