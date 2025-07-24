@@ -39,3 +39,17 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: snmp-exporter
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: thanos-compactor
+    app.kubernetes.io/name: thanos-compactor
+    app.kubernetes.io/part-of: grafana
+  name: thanos-compactor
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thanos-compactor
