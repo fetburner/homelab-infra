@@ -8,6 +8,7 @@ resources:
   - pvc.yaml
   - sealedsecret.yaml
   - objectbucketclaim.yaml
+  - poddisruptionbudget.yaml
 
 patches:
   - path: deployment.patch.yaml
