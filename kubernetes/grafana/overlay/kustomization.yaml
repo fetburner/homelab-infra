@@ -9,6 +9,7 @@ resources:
   - sealedsecret.yaml
   - objectbucketclaim.yaml
   - poddisruptionbudget.yaml
+  - horizontalpodautoscaler.yaml
 
 patches:
   - path: deployment.patch.yaml
