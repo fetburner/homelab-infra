@@ -16,7 +16,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   labels:
-    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/component: grafana
     app.kubernetes.io/name: grafana
     app.kubernetes.io/part-of: grafana
   name: grafana
@@ -33,7 +33,7 @@ metadata:
     app.kubernetes.io/component: snmp-exporter
     app.kubernetes.io/name: snmp-exporter
     app.kubernetes.io/part-of: grafana
-  name: grafana
+  name: snmp-exporter
 spec:
   minAvailable: 1
   selector:
