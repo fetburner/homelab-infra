@@ -53,3 +53,17 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: thanos-compactor
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: thanos-querier
+    app.kubernetes.io/name: thanos-querier
+    app.kubernetes.io/part-of: grafana
+  name: thanos-querier
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thanos-querier
