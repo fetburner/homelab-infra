@@ -5,7 +5,7 @@ metadata:
     app.kubernetes.io/component: nginx
     app.kubernetes.io/name: epgstation-nginx
     app.kubernetes.io/part-of: epgstation
-  name: thanos-sidecar
+  name: epgstation-nginx
 spec:
   minAvailable: 1
   selector:
