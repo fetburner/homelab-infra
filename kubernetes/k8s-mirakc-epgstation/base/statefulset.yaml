@@ -33,6 +33,13 @@ spec:
           securityContext:
             privileged: true
             readOnlyRootFilesystem: true
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: 40772
+              httpHeaders:
+            initialDelaySeconds: 3
+            periodSeconds: 3
           livenessProbe:
             httpGet:
               path: /api/status
@@ -78,6 +85,13 @@ spec:
           securityContext:
             privileged: true
             readOnlyRootFilesystem: true
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: 8888
+              httpHeaders:
+            initialDelaySeconds: 3
+            periodSeconds: 3
           livenessProbe:
             httpGet:
               path: /api/version
