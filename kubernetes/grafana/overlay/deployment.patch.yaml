@@ -88,6 +88,19 @@ metadata:
   name: thanos-querier
 spec:
   replicas: 1
+  template:
+    spec:
+      containers:
+        - name: thanos-querier
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 200Mi
+              ephemeral-storage: 200M
+            requests:
+              cpu: 0.1
+              memory: 100Mi
+              ephemeral-storage: 200M
 ---
 apiVersion: apps/v1
 kind: Deployment
