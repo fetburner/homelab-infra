@@ -135,3 +135,16 @@ metadata:
   name: snmp-exporter
 spec:
   replicas: 2
+  template:
+    spec:
+      containers:
+        - name: snmp-exporter
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 100Mi
+              ephemeral-storage: 50M
+            requests:
+              cpu: 0.1
+              memory: 50Mi
+              ephemeral-storage: 50M
