@@ -96,6 +96,8 @@ spec:
               mountPath: /tmp/app/config
             - name: epgstation-raw-config
               mountPath: /app/config
+          securityContext:
+            readOnlyRootFilesystem: true
       volumes:
         - name: epgstation-graphics-driver
           hostPath:
