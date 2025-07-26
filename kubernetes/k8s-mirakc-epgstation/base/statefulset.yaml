@@ -41,10 +41,8 @@ spec:
             initialDelaySeconds: 3
             periodSeconds: 3
           livenessProbe:
-            httpGet:
-              path: /api/status
+            tcpSocket:
               port: 40772
-              httpHeaders:
             initialDelaySeconds: 3
             periodSeconds: 10
       imagePullSecrets:
@@ -93,10 +91,8 @@ spec:
             initialDelaySeconds: 3
             periodSeconds: 3
           livenessProbe:
-            httpGet:
-              path: /api/version
+            tcpSocket:
               port: 8888
-              httpHeaders:
             initialDelaySeconds: 3
             periodSeconds: 10
       imagePullSecrets:
