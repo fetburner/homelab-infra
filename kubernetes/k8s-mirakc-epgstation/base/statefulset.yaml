@@ -73,7 +73,7 @@ spec:
             readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:
-              path: /
+              path: /api/version
               port: 8888
               httpHeaders:
             initialDelaySeconds: 3
