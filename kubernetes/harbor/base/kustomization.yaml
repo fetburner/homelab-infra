@@ -11,14 +11,11 @@ helmcharts:
       expose:
         type: nodePort
         tls:
-          auto:
-            commonName: harbor.fetburner.dev
+          enabled: false
         nodePort:
           ports:
             http:
               nodePort: 30002
-            https:
-              nodePort: 30003
       persistence:
         persistentVolumeClaim:
           redis:
