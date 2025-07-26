@@ -30,6 +30,13 @@ spec:
               mountPath: /etc/nginx/conf.d
           securityContext:
             readOnlyRootFilesystem: true
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+              httpHeaders:
+            initialDelaySeconds: 3
+            periodSeconds: 3
       volumes:
         - name: nginx-cache
           emptyDir:
