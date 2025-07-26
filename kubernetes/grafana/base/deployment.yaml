@@ -15,6 +15,9 @@ spec:
       labels:
         app.kubernetes.io/name: grafana
     spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
       containers:
         - name: grafana
           image: grafana/grafana:9.3.16
@@ -48,6 +51,9 @@ spec:
       labels:
         app.kubernetes.io/name: thanos-store-gateway
     spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
       containers:
         - name: thanos-store-gataway
           image: thanosio/thanos:v0.38.0
@@ -92,6 +98,9 @@ spec:
       labels:
         app.kubernetes.io/name: thanos-querier
     spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
       containers:
         - name: thanos-querier
           image: thanosio/thanos:v0.38.0
@@ -126,6 +135,9 @@ spec:
       labels:
         app.kubernetes.io/name: thanos-compactor
     spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
       containers:
         - name: thanos-compactor
           image: thanosio/thanos:v0.38.0
@@ -169,6 +181,9 @@ spec:
       labels:
         app.kubernetes.io/name: snmp-exporter
     spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
       containers:
         - name: snmp-exporter
           image: ghcr.io/fetburner/snmp-exporter
