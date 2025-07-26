@@ -98,6 +98,15 @@ spec:
               mountPath: /app/config
           securityContext:
             readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 0.1
+              memory: 16M
+              ephemeral-storage: 16M
+            limits:
+              cpu: 0.2
+              memory: 32M
+              ephemeral-storage: 16M
       volumes:
         - name: epgstation-graphics-driver
           hostPath:
