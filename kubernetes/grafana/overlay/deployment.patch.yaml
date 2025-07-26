@@ -87,7 +87,6 @@ metadata:
     app.kubernetes.io/part-of: grafana
   name: thanos-querier
 spec:
-  replicas: 1
   template:
     spec:
       containers:
@@ -107,7 +106,6 @@ kind: Deployment
 metadata:
   name: thanos-store-gateway
 spec:
-  replicas: 1
   template:
     spec:
       containers:
@@ -135,7 +133,6 @@ kind: Deployment
 metadata:
   name: thanos-compactor
 spec:
-  replicas: 1
   template:
     spec:
       containers:
@@ -165,7 +162,6 @@ kind: Deployment
 metadata:
   name: snmp-exporter
 spec:
-  replicas: 2
   template:
     spec:
       containers:
