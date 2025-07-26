@@ -24,6 +24,8 @@ metadata:
     app.kubernetes.io/part-of: epgstation
   name: epgstation
 spec:
+  type: ClusterIP
+  clusterIP: None
   ports:
     - name: epgstation
       port: 8888
@@ -41,6 +43,8 @@ metadata:
     app.kubernetes.io/part-of: epgstation
   name: mirakc
 spec:
+  type: ClusterIP
+  clusterIP: None
   ports:
     - name: mirakc
       port: 40772
