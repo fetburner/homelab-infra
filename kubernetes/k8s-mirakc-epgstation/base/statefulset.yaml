@@ -71,6 +71,13 @@ spec:
           securityContext:
             privileged: true
             readOnlyRootFilesystem: true
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8888
+              httpHeaders:
+            initialDelaySeconds: 3
+            periodSeconds: 3
       imagePullSecrets:
         - name: dockerconfigjson-ghcr
       volumes:
