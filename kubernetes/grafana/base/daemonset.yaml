@@ -19,6 +19,9 @@ spec:
         prometheus.io/port: '9100'
         prometheus.io/path: /metrics
     spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
       containers:
         - name: exporter
           image: prom/node-exporter:v1.9.1
