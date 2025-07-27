@@ -18,8 +18,9 @@ spec:
     spec:
       serviceAccountName: prometheus
       containers:
-        - image: thanosio/thanos:v0.38.0
-          name: thanos-sidecar
+        - name: thanos-sidecar
+          image: thanosio/thanos:v0.38.0
+          imagePullPolicy: Always
           args:
             - sidecar
             - --grpc-address=0.0.0.0:10091
@@ -36,8 +37,9 @@ spec:
               mountPath: /prometheus
           securityContext:
             readOnlyRootFilesystem: true
-        - image: prom/prometheus:v3.4.2
-          name: prometheus
+        - name: prometheus
+          image: prom/prometheus:v3.4.2
+          imagePullPolicy: Always
           args:
             - --config.file=/etc/prometheus/prometheus.yml
             - --storage.tsdb.path=/prometheus
