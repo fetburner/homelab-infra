@@ -10,7 +10,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: epgstation-mirakc
-  servicename: mirakc
+  serviceName: mirakc
   template:
     metadata:
       labels:
@@ -64,7 +64,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: epgstation-epgstation
-  servicename: epgstation
+  serviceName: epgstation
   template:
     metadata:
       labels:
