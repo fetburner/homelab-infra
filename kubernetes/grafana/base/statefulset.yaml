@@ -10,7 +10,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: thanos-sidecar
-  servicename: thanos-sidecar
+  serviceName: thanos-sidecar
   template:
     metadata:
       labels:
