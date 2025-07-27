@@ -230,3 +230,10 @@ spec:
               name: snmp-exporter
           securityContext:
             readOnlyRootFilesystem: true
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 9116
+          livenessProbe:
+            tcpSocket:
+              port: 9116
