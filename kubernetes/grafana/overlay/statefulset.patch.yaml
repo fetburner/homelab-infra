@@ -13,6 +13,25 @@ spec:
                 name: thanos-bucket
             - secretRef:
                 name: thanos-bucket
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 100Mi
+              ephemeral-storage: 200M
+            requests:
+              cpu: 0.1
+              memory: 50Mi
+              ephemeral-storage: 200M
+        - name: prometheus
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 1Gi
+              ephemeral-storage: 200M
+            requests:
+              cpu: 0.1
+              memory: 500Mi
+              ephemeral-storage: 200M
       securityContext:
         runAsUser: 0
         runAsGroup: 0
