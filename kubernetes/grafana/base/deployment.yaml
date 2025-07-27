@@ -79,12 +79,15 @@ spec:
           args:
             - store
             - --grpc-address=0.0.0.0:10091
+            - --http-address=0.0.0.0:10092
             - --data-dir=/tmp/thanos/store
             - --ignore-deletion-marks-delay=24h
             - --objstore.config-file=/etc/thanos/bucket.yml
           ports:
-            - name: thanos-store
+            - name: grpc
               containerPort: 10091
+            - name: http
+              containerPort: 10092
           volumeMounts:
             - name: thanos-store
               mountPath: /tmp/thanos/store
@@ -92,6 +95,14 @@ spec:
               mountPath: /etc/thanos
           securityContext:
             readOnlyRootFilesystem: true
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 10092
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 10092
       volumes:
         - name: thanos-store
           emptyDir:
