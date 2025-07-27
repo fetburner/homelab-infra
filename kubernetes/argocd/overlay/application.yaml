@@ -186,9 +186,62 @@ spec:
     namespace: harbor
   project: default
   source:
-    path: kubernetes/harbor
-    repoURL: https://github.com/fetburner/homelab-infra
-    targetRevision: HEAD
+    repoURL: https://helm.goharbor.io
+    chart: harbor
+    targetRevision: v1.17.1
+    helm:
+      releaseName: harbor
+      values: |
+        externalURL: https://harbor.fetburner.dev
+        core:
+          nodeSelector:
+            kubernetes.io/arch: amd64
+        nginx:
+          nodeSelector:
+            kubernetes.io/arch: amd64
+        trivy:
+          nodeSelector:
+            kubernetes.io/arch: amd64
+        portal:
+          nodeSelector:
+            kubernetes.io/arch: amd64
+        jobservice:
+          nodeSelector:
+            kubernetes.io/arch: amd64
+        registry:
+          nodeSelector:
+            kubernetes.io/arch: amd64
+        database:
+          internal:
+            nodeSelector:
+              kubernetes.io/arch: amd64
+        redis:
+          internal:
+            nodeSelector:
+              kubernetes.io/arch: amd64
+        expose:
+          type: nodePort
+          tls:
+            enabled: false
+          nodePort:
+            ports:
+              http:
+                nodePort: 30002
+        persistence:
+          persistentVolumeClaim:
+            redis:
+              storageClass: rook-ceph-block
+            trivy:
+              storageClass: rook-ceph-block
+            registry:
+              accessMode: ReadWriteMany
+              storageClass: rook-cephfs
+            database:
+              storageClass: rook-ceph-block
+            jobservice:
+              jobLog:
+                accessMode: ReadWriteMany
+                storageClass: rook-cephfs
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
