@@ -146,6 +146,14 @@ spec:
               name: thanos-querier
           securityContext:
             readOnlyRootFilesystem: true
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 10902
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 10902
 ---
 apiVersion: apps/v1
 kind: Deployment
