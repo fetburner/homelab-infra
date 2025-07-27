@@ -11,3 +11,31 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: epgstation-nginx
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: mirakc
+    app.kubernetes.io/name: epgstation-mirakc
+    app.kubernetes.io/part-of: epgstation
+  name: epgstation-mirakc
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: epgstation-mirakc
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    app.kubernetes.io/component: epgstation
+    app.kubernetes.io/name: epgstation-epgstation
+    app.kubernetes.io/part-of: epgstation
+  name: epgstation-epgstation
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: epgstation-epgstation
