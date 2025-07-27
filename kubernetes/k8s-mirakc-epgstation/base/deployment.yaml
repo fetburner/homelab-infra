@@ -15,6 +15,9 @@ spec:
       labels:
         app.kubernetes.io/name: epgstation-nginx
     spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
       containers:
         - name: nginx
           image: nginx:1.28.0-alpine-slim
