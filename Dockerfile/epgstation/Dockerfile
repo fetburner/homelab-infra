@@ -1,7 +1,7 @@
 FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
 
 # node.js
-FROM node:18-alpine3.21 AS node-image
+FROM node:24-alpine3.21 AS node-image
 
 RUN --mount=type=bind,from=magicpak-image,target=/mnt \
     --mount=type=cache,target=/var/cache/apk,sharing=locked \
@@ -11,7 +11,7 @@ RUN --mount=type=bind,from=magicpak-image,target=/mnt \
     cp --archive --parents --no-dereference /etc/ssl /build
 
 # EPGStation client build
-FROM node:18-alpine3.21 AS epgstation-client-image
+FROM node:24-alpine3.21 AS epgstation-client-image
 
 WORKDIR /app
 COPY ./Dockerfile/epgstation/epgstation /app
@@ -29,7 +29,7 @@ WORKDIR /build
 RUN cp --archive --parents --no-dereference /app/client /build
 
 # EPGStation server build
-FROM node:18-alpine3.21 AS epgstation-server-image
+FROM node:24-alpine3.21 AS epgstation-server-image
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
