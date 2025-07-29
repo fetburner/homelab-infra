@@ -17,6 +17,8 @@ spec:
         app.kubernetes.io/name: thanos-sidecar
     spec:
       serviceAccountName: prometheus
+      securityContext:
+        fsGroup: 65534
       containers:
         - name: thanos-sidecar
           image: thanosio/thanos:v0.38.0
@@ -37,6 +39,8 @@ spec:
             - name: prometheus
               mountPath: /prometheus
           securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
             readOnlyRootFilesystem: true
         - name: prometheus
           image: prom/prometheus:v3.4.2
@@ -62,6 +66,8 @@ spec:
             - name: prometheus-config
               mountPath: /etc/prometheus
           securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
             readOnlyRootFilesystem: true
           readinessProbe:
             httpGet:
