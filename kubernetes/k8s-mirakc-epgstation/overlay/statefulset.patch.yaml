@@ -51,8 +51,6 @@ metadata:
 spec:
   template:
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
       containers:
         - name: epgstation
           resources:
@@ -60,13 +58,13 @@ spec:
               cpu: 0.1
               memory: 256M
               ephemeral-storage: 1G
+              gpu.intel.com/i915: "1"
             limits:
               cpu: 2
               memory: 2G
               ephemeral-storage: 1G
+              gpu.intel.com/i915: "1"
           volumeMounts:
-            - name: epgstation-graphics-driver
-              mountPath: /dev/dri
             - name: epgstation-epgstation-logs
               mountPath: /app/logs
             - name: epgstation-epgstation-drop
@@ -108,9 +106,6 @@ spec:
               memory: 32M
               ephemeral-storage: 16M
       volumes:
-        - name: epgstation-graphics-driver
-          hostPath:
-            path: /dev/dri
         - name: epgstation-epgstation-logs
           emptyDir:
             medium: Memory

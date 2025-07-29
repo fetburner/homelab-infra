@@ -81,7 +81,6 @@ spec:
             - name: epgstation-upload
               mountPath: /app/data/upload
           securityContext:
-            privileged: true
             readOnlyRootFilesystem: true
           readinessProbe:
             httpGet:
