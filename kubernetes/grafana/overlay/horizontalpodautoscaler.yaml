@@ -11,7 +11,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: grafana
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 5
   metrics:
   - type: Resource
@@ -57,7 +57,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: thanos-querier
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 5
   metrics:
   - type: Resource
@@ -80,7 +80,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: thanos-store-gateway
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 5
   metrics:
   - type: Resource
