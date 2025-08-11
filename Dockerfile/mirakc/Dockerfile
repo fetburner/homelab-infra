@@ -13,7 +13,7 @@ FROM ghcr.io/fetburner/recdvb:latest AS recdvb-image
 FROM ghcr.io/fetburner/arib-b25-stream-test:latest AS arib-b25-stream-test-image
 
 # mirakc-arib, mirakc
-FROM mirakc/mirakc:3.4.21-alpine AS mirakc-image
+FROM mirakc/mirakc:3.4.29-alpine AS mirakc-image
 
 RUN --mount=type=bind,from=magicpak-image,target=/mnt \
     --mount=type=cache,target=/var/cache/apk,sharing=locked \
