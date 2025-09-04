@@ -5,9 +5,6 @@ on:
     branches-ignore:
       - buildcache
 
-concurrency:
-  group: ${{ github.ref_name }}
-
 jobs:
   enumerate-dockerfiles:
     runs-on: ubuntu-latest
