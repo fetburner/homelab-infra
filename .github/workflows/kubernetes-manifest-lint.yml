@@ -9,20 +9,35 @@ jobs:
   enumerate-manifests:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.enumerate.outputs.matrix }}
+      name: ${{ steps.enumerate.outputs.name }}
     steps:
       - uses: actions/checkout@v5
 
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            changed:
+              - 'kubernetes/**'
+
       - id: enumerate
         run: |
-          echo "matrix=$(ls kubernetes | jq -R -s -c '{ "name": split("\n")[:-1] }')" > $GITHUB_OUTPUT
+          echo "name=$(jq -c "$JQ_FILTER" <<< "$JQ_INPUT_JSON")" > $GITHUB_OUTPUT
+        env:
+          JQ_INPUT_JSON: ${{ steps.filter.outputs.changed_files }}
+          JQ_FILTER: 'map( capture("^kubernetes/(?<a>[a-zA-Z0-9_-]+)/") | .a ) | unique | .'
 
   kubernetes-manifest-lint:
     runs-on: ubuntu-latest
     needs:
       - enumerate-manifests
+    if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
+
     strategy:
-      matrix: ${{ fromJSON(needs.enumerate-manifests.outputs.matrix) }}
+      matrix:
+        name: ${{ fromJSON(needs.enumerate-manifests.outputs.name) }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
