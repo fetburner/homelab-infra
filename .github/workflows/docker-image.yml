@@ -5,42 +5,47 @@ on:
     branches-ignore:
       - buildcache
 
-concurrency:
-  group: ${{ github.ref_name }}
-
 jobs:
   enumerate-dockerfiles:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.enumerate.outputs.matrix }}
+      name: ${{ steps.enumerate.outputs.name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            changed:
+              - 'Dockerfile/**'
+
       - id: enumerate
         run: |
-          echo "matrix=$(ls Dockerfile | jq -R -s -c '{ "name": split("\n")[:-1] }')" > $GITHUB_OUTPUT
+          echo "name=$(jq -c "$JQ_FILTER" <<< "$JQ_INPUT_JSON")" > $GITHUB_OUTPUT
+        env:
+          JQ_INPUT_JSON: ${{ steps.filter.outputs.changed_files }}
+          JQ_FILTER: 'map( capture("^Dockerfile/(?<a>[a-zA-Z0-9_-]+)/") | .a ) | unique | .'
 
   docker-lint:
     runs-on: ubuntu-latest
     needs:
       - enumerate-dockerfiles
+    if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
+
     strategy:
-      matrix: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.matrix) }}
+      matrix:
+        name: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.name) }}
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v46
-        with:
-          files: Dockerfile/${{ matrix.name }}/**
-
       - uses: hadolint/hadolint-action@v3.1.0
-        if: ${{ steps.changed-files.outputs.all_modified_files }}
         with:
           dockerfile: Dockerfile/${{ matrix.name }}/Dockerfile
 
@@ -48,29 +53,24 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - enumerate-dockerfiles
+    if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
+
     strategy:
-      matrix: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.matrix) }}
+      matrix:
+        name: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.name) }}
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v46
-        with:
-          files: Dockerfile/${{ matrix.name }}/**
-
       - name: Set up QEMU
-        if: ${{ steps.changed-files.outputs.all_modified_files }}
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        if: ${{ steps.changed-files.outputs.all_modified_files }}
         uses: docker/setup-buildx-action@v3
 
       - name: Login to the Container registry
-        if: ${{ steps.changed-files.outputs.all_modified_files }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -79,7 +79,6 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        if: ${{ steps.changed-files.outputs.all_modified_files }}
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.actor }}/${{ matrix.name }}
@@ -88,7 +87,6 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
 
       - name: Build and push
-        if: ${{ steps.changed-files.outputs.all_modified_files }}
         uses: docker/build-push-action@v6
         with:
           context: .
