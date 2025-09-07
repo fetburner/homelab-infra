@@ -42,10 +42,10 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: cloudflared
+              kubernetes.io/metadata.name: cloudflared
           namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: cloudflared
+              pod: cloudflared
       ports:
         - protocol: TCP
           port: 80
