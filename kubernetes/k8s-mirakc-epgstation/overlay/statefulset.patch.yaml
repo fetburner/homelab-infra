@@ -51,8 +51,7 @@ metadata:
 spec:
   template:
     spec:
-      nodeSelector:
-        kubernetes.io/arch: amd64
+      nodeName: js50
       containers:
         - name: epgstation
           resources:
