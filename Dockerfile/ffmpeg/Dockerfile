@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
       libtheora-dev libvorbis-dev libvpx-dev x264-dev x265-dev libva-dev libgcc libstdc++ ca-certificates \
       libgomp expat git lame-libs libass libvpx opus libtheora libvorbis x264-libs x265-libs && \
     case ${TARGETPLATFORM} in \
-      linux/amd64) apk add libva libvdpau-dev libva-intel-driver intel-media-driver intel-media-sdk-dev;; \
+      linux/amd64) apk add libva-dev libvdpau-dev libva-intel-driver intel-media-driver intel-media-sdk-dev;; \
     esac
 
 # aribb24
