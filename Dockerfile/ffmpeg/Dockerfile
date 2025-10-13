@@ -1,5 +1,5 @@
 # FFmpeg build
-FROM alpine:3.22.1 AS ffmpeg-image
+FROM alpine:3.22.2 AS ffmpeg-image
 
 ARG TARGETPLATFORM
 
