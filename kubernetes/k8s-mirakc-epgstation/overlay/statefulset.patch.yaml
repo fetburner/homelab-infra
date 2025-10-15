@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       nodeSelector:
-        epgstation/tuner: dvb
+        epgstation.fetburner.dev/tuner: dvb
       containers:
         - name: mirakc
           env:
