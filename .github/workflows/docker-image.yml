@@ -25,7 +25,7 @@ jobs:
 
       - id: enumerate
         run: |
-          echo "name=$(jq -c "$JQ_FILTER" <<< "$JQ_INPUT_JSON")" > $GITHUB_OUTPUT
+          echo "name=$(jq -c "$JQ_FILTER" <<< "$JQ_INPUT_JSON")" | tee -a $GITHUB_OUTPUT
         env:
           JQ_INPUT_JSON: ${{ steps.filter.outputs.changed_files }}
           JQ_FILTER: 'map( capture("^Dockerfile/(?<a>[a-zA-Z0-9_-]+)/") | .a ) | unique | .'
