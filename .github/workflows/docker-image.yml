@@ -7,7 +7,7 @@ on:
 
 jobs:
   enumerate-dockerfiles:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       name: ${{ steps.enumerate.outputs.name }}
     steps:

@@ -7,7 +7,7 @@ on:
 
 jobs:
   enumerate-manifests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       name: ${{ steps.enumerate.outputs.name }}
     steps:
@@ -29,7 +29,7 @@ jobs:
           JQ_FILTER: 'map( capture("^kubernetes/(?<a>[a-zA-Z0-9_-]+)/") | .a ) | unique | .'
 
   kubernetes-manifest-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs:
       - enumerate-manifests
     if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
