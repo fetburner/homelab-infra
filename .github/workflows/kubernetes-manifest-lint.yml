@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-slim
     needs:
       - enumerate-manifests
-    if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
+    if: ${{ needs.enumerate-manifests.outputs.name != '' && toJson(fromJson(needs.enumerate-manifests.outputs.name)) != '[]' }}
 
     strategy:
       matrix:
