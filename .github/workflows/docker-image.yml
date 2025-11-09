@@ -5,6 +5,10 @@ on:
     branches-ignore:
       - buildcache
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   enumerate-dockerfiles:
     runs-on: ubuntu-slim
