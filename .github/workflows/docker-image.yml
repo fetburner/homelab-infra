@@ -87,7 +87,7 @@ jobs:
         with:
           images: ghcr.io/fetburner/${{ matrix.name }}
           tags: |
-            type=sha
+            type=sha,format=long
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
 
       - name: Build and push
