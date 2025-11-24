@@ -4,8 +4,7 @@ FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
 FROM ghcr.io/fetburner/recpt1:sha-a4964ca1b5d6e3fa5a2e70e525126d39fc95a09f AS recpt1-image
 
 # recdvb
-# hadolint ignore=DL3007
-FROM ghcr.io/fetburner/recdvb:latest AS recdvb-image
+FROM ghcr.io/fetburner/recdvb:sha-e3c7ab81b507ce31fa3c6845e72207653374e4c5 AS recdvb-image
 
 # arib-b25-stream-test
 # hadolint ignore=DL3007
