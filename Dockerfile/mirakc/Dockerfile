@@ -2,7 +2,7 @@ FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
 
 # recpt1
 # hadolint ignore=DL3007
-FROM ghcr.io/fetburner/recpt1:latest AS recpt1-image
+FROM ghcr.io/fetburner/recpt1:sha-a4964ca1b5d6e3fa5a2e70e525126d39fc95a09f AS recpt1-image
 
 # recdvb
 # hadolint ignore=DL3007
