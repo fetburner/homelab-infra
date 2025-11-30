@@ -5,13 +5,17 @@ on:
     branches-ignore:
       - buildcache
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   enumerate-dockerfiles:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       name: ${{ steps.enumerate.outputs.name }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -25,7 +29,7 @@ jobs:
 
       - id: enumerate
         run: |
-          echo "name=$(jq -c "$JQ_FILTER" <<< "$JQ_INPUT_JSON")" > $GITHUB_OUTPUT
+          echo "name=$(jq -c "$JQ_FILTER" <<< "$JQ_INPUT_JSON")" | tee -a $GITHUB_OUTPUT
         env:
           JQ_INPUT_JSON: ${{ steps.filter.outputs.changed_files }}
           JQ_FILTER: 'map( capture("^Dockerfile/(?<a>[a-zA-Z0-9_-]+)/") | .a ) | unique | .'
@@ -41,7 +45,7 @@ jobs:
         name: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.name) }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -60,7 +64,7 @@ jobs:
         name: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.name) }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -74,16 +78,16 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: fetburner
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.actor }}/${{ matrix.name }}
+          images: ghcr.io/fetburner/${{ matrix.name }}
           tags: |
-            type=sha
+            type=sha,format=long
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
 
       - name: Build and push

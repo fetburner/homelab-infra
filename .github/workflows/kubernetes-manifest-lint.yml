@@ -7,11 +7,11 @@ on:
 
 jobs:
   enumerate-manifests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       name: ${{ steps.enumerate.outputs.name }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -23,16 +23,16 @@ jobs:
 
       - id: enumerate
         run: |
-          echo "name=$(jq -c "$JQ_FILTER" <<< "$JQ_INPUT_JSON")" > $GITHUB_OUTPUT
+          echo "name=$(jq -c "$JQ_FILTER" <<< "$JQ_INPUT_JSON")" | tee -a $GITHUB_OUTPUT
         env:
           JQ_INPUT_JSON: ${{ steps.filter.outputs.changed_files }}
           JQ_FILTER: 'map( capture("^kubernetes/(?<a>[a-zA-Z0-9_-]+)/") | .a ) | unique | .'
 
   kubernetes-manifest-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs:
       - enumerate-manifests
-    if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
+    if: ${{ needs.enumerate-manifests.outputs.name != '' && toJson(fromJson(needs.enumerate-manifests.outputs.name)) != '[]' }}
 
     strategy:
       matrix:
@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4

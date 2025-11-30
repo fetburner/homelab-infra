@@ -1,8 +1,7 @@
 # additional pcsc tool
-# hadolint ignore=DL3007
-FROM ghcr.io/fetburner/pcsc-tool-build:latest AS pcsc-tool-image
+FROM ghcr.io/fetburner/pcsc-tool-build:sha-8b2b005656a41d50ac698f6fc4f1085a076a857c AS pcsc-tool-image
 
-FROM alpine:3.22.1 AS build-image
+FROM alpine:3.22.2 AS build-image
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
