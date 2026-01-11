@@ -6,8 +6,8 @@ FROM node:18-alpine3.21 AS node-image
 RUN --mount=type=bind,from=magicpak-image,target=/mnt \
     --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk --update-cache add gcc libc-dev ca-certificates && \
-    /mnt/bin/magicpak -v "$(which node)" /build --include '/usr/lib/libssl*' --include '/usr/lib/libcrypto*' && \
+    apk --update-cache add gcc libc-dev ca-certificates tini && \
+    /mnt/bin/magicpak -v "$(which node)" "$(which tini)" /build --include '/usr/lib/libssl*' --include '/usr/lib/libcrypto*' && \
     cp --archive --parents --no-dereference /etc/ssl /build
 
 # EPGStation client build
@@ -67,5 +67,5 @@ COPY --from=epgstation-client-image /build /
 COPY --from=epgstation-server-image /build /
 
 WORKDIR /app
-ENTRYPOINT ["node"]
-CMD ["/app/dist/index.js"]
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "/app/dist/index.js"]
