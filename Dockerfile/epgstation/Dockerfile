@@ -53,7 +53,7 @@ RUN cp --archive --parents --no-dereference /app /build
 
 # FFmpeg
 # hadolint ignore=DL3007
-FROM ghcr.io/fetburner/ffmpeg:latest AS ffmpeg-image
+FROM ghcr.io/fetburner/ffmpeg:sha-ee1ad2a38d51d7f9b076fed5a7f626e662c27ee2 AS ffmpeg-image
 
 # final image
 FROM busybox:1.37.0-musl
