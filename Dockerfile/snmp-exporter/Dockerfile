@@ -8,7 +8,7 @@ WORKDIR /opt
 COPY Dockerfile/snmp-exporter/generator.yml .
 RUN /bin/generator generate
 
-FROM prom/snmp-exporter:v0.29.0
+FROM prom/snmp-exporter:v0.30.1
 
 WORKDIR /etc/snmp_exporter
 COPY --from=generator-image /opt/snmp.yml .
