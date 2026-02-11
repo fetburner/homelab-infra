@@ -86,9 +86,9 @@ jobs:
         id: cache
         with:
           path: cache-mount
-          key: cache-mount-${{ hashFiles('./Dockerfile/${{ matrix.name }}/Dockerfile') }}
+          key: cache-mount-${{ matrix.name }}-${{ hashFiles('Dockerfile/**/Dockerfile') }}
           restore_keys: |
-            cache-mount-${{ matrix.name }}-${{ hashFiles('./Dockerfile/${{ matrix.name }}/Dockerfile') }}
+            cache-mount-${{ matrix.name }}-${{ hashFiles('Dockerfile/**/Dockerfile') }}
             cache-mount-${{ matrix.name }}-
 
       - name: Restore Docker cache mounts
