@@ -1,11 +1,10 @@
-FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
-
 FROM alpine:3.23.3 AS build-image
 
-RUN --mount=type=bind,from=magicpak-image,target=/mnt \
-    --mount=type=cache,target=/var/cache/apk,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
-    apk add gcc libc-dev envsubst && \
+    apk add gcc libc-dev envsubst
+
+RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
     /mnt/bin/magicpak -v "$(which envsubst)" /build
 
 # final image
