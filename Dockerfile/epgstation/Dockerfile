@@ -78,7 +78,7 @@ COPY --parents --from=node-deps /etc/ssl /
 
 COPY --parents --from=server-prod-deps /app/node_modules /
 
-COPY --parents --from=client-builder /app/client /
+COPY --parents --from=client-builder /app/client/dist /
 
 COPY --parents --from=server-builder --exclude=/app/node_modules /app /
 
