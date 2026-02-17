@@ -16,7 +16,7 @@ WORKDIR /app/client
 COPY ./Dockerfile/epgstation/epgstation/client/package*.json .
 
 RUN --mount=type=cache,id=client,target=~/.npm,sharing=locked \
-    --mount=type=cache,id=client,target=./node_modules,sharing=locked \
+    --mount=type=cache,id=client,target=./node_modules/.cache,sharing=locked \
     npm config set fetch-retries 10 && \
     npm config set fetch-retry-mintimeout 100000 && \
     npm config set fetch-retry-maxtimeout 600000 && \
@@ -24,9 +24,7 @@ RUN --mount=type=cache,id=client,target=~/.npm,sharing=locked \
 
 COPY ./Dockerfile/epgstation/epgstation /app
 
-RUN --mount=type=cache,id=client,target=~/.npm,sharing=locked \
-    --mount=type=cache,id=client,target=./node_modules,sharing=locked \
-    npm run build --loglevel=info
+RUN npm run build --loglevel=info
 
 # EPGStation server build
 FROM node:18-alpine3.21 AS server-base
@@ -43,25 +41,23 @@ ENV DOCKER="YES"
 
 COPY ./Dockerfile/epgstation/epgstation/package*.json .
 
-RUN --mount=type=cache,id=server,target=~/.npm,sharing=locked \
-    --mount=type=cache,id=server,target=./node_modules,sharing=locked \
+RUN --mount=type=cache,id=server-builder,target=~/.npm,sharing=locked \
+    --mount=type=cache,id=server-builder,target=./node_modules/.cache,sharing=locked \
     npm config set fetch-retries 10 && \
     npm config set fetch-retry-mintimeout 100000 && \
     npm config set fetch-retry-maxtimeout 600000 && \
     npm install --no-save --loglevel=info
 
-COPY --exclude=./Dockerfile/epgstation/epgstation/client ./Dockerfile/epgstation/epgstation /app
+COPY --exclude=client Dockerfile/epgstation/epgstation /app
 
-RUN --mount=type=cache,id=server,target=~/.npm,sharing=locked \
-    --mount=type=cache,id=server,target=./node_modules,sharing=locked \
-    npm run build-server --loglevel=info
+RUN npm run build-server --loglevel=info
 
 FROM server-base AS server-prod-deps
 
 COPY ./Dockerfile/epgstation/epgstation/package*.json .
 
-RUN --mount=type=cache,id=server,target=~/.npm,sharing=locked \
-    --mount=type=cache,id=server,target=./node_modules/.cache,sharing=locked \
+RUN --mount=type=cache,id=server-prod-deps,target=~/.npm,sharing=locked \
+    --mount=type=cache,id=server-prod-deps,target=./node_modules/.cache,sharing=locked \
     npm config set fetch-retries 10 && \
     npm config set fetch-retry-mintimeout 100000 && \
     npm config set fetch-retry-maxtimeout 600000 && \
@@ -76,11 +72,22 @@ COPY --from=node-deps /build /
 
 COPY --parents --from=node-deps /etc/ssl /
 
-COPY --parents --from=server-prod-deps /app/node_modules /
+COPY --parents --from=server-prod-deps --exclude=**/*.d.ts --exclude=**/README* --exclude=**/LICENSE* --exclude=**/CHANGELOG* /app/node_modules /
 
 COPY --parents --from=client-builder /app/client/dist /
 
-COPY --parents --from=server-builder --exclude=/app/node_modules /app /
+COPY --parents --from=server-builder /app/dist /
+
+COPY --exclude=client \
+  --exclude=.npmrc \
+  --exclude=.prettierrc \
+  --exclude=.eslintrc.json \
+  --exclude=tsconfig.json \
+  --exclude=package-lock.json \
+  --exclude=src \
+  --exclude=**/*.d.ts \
+  --exclude=**/.gitkeep \
+  Dockerfile/epgstation/epgstation /app
 
 WORKDIR /app
 ENTRYPOINT ["/sbin/tini", "--"]
