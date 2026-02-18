@@ -72,6 +72,7 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
+        id: setup-buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Login to the Container registry
@@ -87,7 +88,7 @@ jobs:
         with:
           path: cache-mount
           key: cache-mount-${{ matrix.name }}-${{ hashFiles('Dockerfile/**/Dockerfile') }}
-          restore_keys: |
+          restore-keys: |
             cache-mount-${{ matrix.name }}-${{ hashFiles('Dockerfile/**/Dockerfile') }}
             cache-mount-${{ matrix.name }}-
 
