@@ -1,0 +1,12 @@
+Dockerfile/epgstation/epgstation/.devcontainer
+Dockerfile/epgstation/epgstation/.git
+Dockerfile/epgstation/epgstation/.github
+Dockerfile/epgstation/epgstation/.vscode
+Dockerfile/epgstation/epgstation/client/.vscode
+Dockerfile/epgstation/epgstation/client/.gitignore
+Dockerfile/epgstation/epgstation/doc
+Dockerfile/epgstation/epgstation/.dockerignore
+Dockerfile/epgstation/epgstation/.gitignore
+Dockerfile/epgstation/epgstation/Dockerfile*
+Dockerfile/epgstation/epgstation/LICENSE
+Dockerfile/epgstation/epgstation/Readme.md

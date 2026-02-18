@@ -1,5 +1,5 @@
 # Generate snmp.yml from generator.yml
-FROM prom/snmp-generator:v0.30.1 AS generator-image
+FROM --platform=$BUILDPLATFORM prom/snmp-generator:v0.30.1 AS generator-image
 
 WORKDIR /opt/mibs
 COPY Dockerfile/snmp-exporter/mibs .
