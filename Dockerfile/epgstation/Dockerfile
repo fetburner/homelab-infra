@@ -1,15 +1,14 @@
 # node.js
-FROM node:18-alpine3.21 AS node-deps
+FROM node:18-bookworm AS base
 
-RUN --mount=type=cache,id=apk,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk --update-cache add gcc libc-dev ca-certificates tini
-
-RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,source=/bin,target=/bin/magicpak \
-    /bin/magicpak/magicpak -v "$(which node)" "$(which tini)" /build --include '/usr/lib/libssl*' --include '/usr/lib/libcrypto*'
+# hadolint ignore=DL3009
+RUN --mount=type=cache,id=apt,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,id=apt,target=/var/apt/lists,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-upgrade --no-install-recommends tini
 
 # EPGStation client build
-FROM --platform=$BUILDPLATFORM node:18-alpine3.21 AS client-builder
+FROM --platform=$BUILDPLATFORM base AS client-builder
 
 WORKDIR /app/client
 
@@ -17,9 +16,6 @@ COPY ./Dockerfile/epgstation/epgstation/client/package*.json .
 
 RUN --mount=type=cache,id=client,target=~/.npm,sharing=locked \
     --mount=type=cache,id=client,target=./node_modules/.cache,sharing=locked \
-    npm config set fetch-retries 10 && \
-    npm config set fetch-retry-mintimeout 100000 && \
-    npm config set fetch-retry-maxtimeout 600000 && \
     npm install --no-save --loglevel=info
 
 COPY ./Dockerfile/epgstation/epgstation /app
@@ -27,15 +23,17 @@ COPY ./Dockerfile/epgstation/epgstation /app
 RUN npm run build --loglevel=info
 
 # EPGStation server build
-FROM node:18-alpine3.21 AS server-base
+FROM base AS server-deps
 
 WORKDIR /app
 
-RUN --mount=type=cache,id=apk,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk add g++ make pkgconf python3 py3-pip
+# hadolint ignore=DL3009
+RUN --mount=type=cache,id=apt,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,id=apt,target=/var/apt/lists,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-upgrade --no-install-recommends build-essential python3
 
-FROM --platform=$BUILDPLATFORM server-base AS server-builder
+FROM --platform=$BUILDPLATFORM server-deps AS server-builder
 
 ENV DOCKER="YES"
 
@@ -43,34 +41,30 @@ COPY ./Dockerfile/epgstation/epgstation/package*.json .
 
 RUN --mount=type=cache,id=server-builder,target=~/.npm,sharing=locked \
     --mount=type=cache,id=server-builder,target=./node_modules/.cache,sharing=locked \
-    npm config set fetch-retries 10 && \
-    npm config set fetch-retry-mintimeout 100000 && \
-    npm config set fetch-retry-maxtimeout 600000 && \
     npm install --no-save --loglevel=info
 
 COPY --exclude=client Dockerfile/epgstation/epgstation /app
 
 RUN npm run build-server --loglevel=info
 
-FROM server-base AS server-prod-deps
+FROM server-deps AS server-prod-deps
 
 COPY ./Dockerfile/epgstation/epgstation/package*.json .
 
 RUN --mount=type=cache,id=server-prod-deps,target=~/.npm,sharing=locked \
     --mount=type=cache,id=server-prod-deps,target=./node_modules/.cache,sharing=locked \
-    npm config set fetch-retries 10 && \
-    npm config set fetch-retry-mintimeout 100000 && \
-    npm config set fetch-retry-maxtimeout 600000 && \
     npm install --omit=dev --no-save --loglevel=info
 
 # final image
-FROM busybox:1.37.0-musl
+# hadolint ignore=DL3006
+FROM gcr.io/distroless/nodejs18-debian12
+
+WORKDIR /app
+
+COPY --from=base /usr/bin/dash /bin/sh
+COPY --parents --from=base /usr/bin/tini /
 
 COPY --from=ghcr.io/fetburner/ffmpeg:sha-ee1ad2a38d51d7f9b076fed5a7f626e662c27ee2 / /
-
-COPY --from=node-deps /build /
-
-COPY --parents --from=node-deps /etc/ssl /
 
 COPY --parents --from=server-prod-deps --exclude=**/*.d.ts --exclude=**/README* --exclude=**/LICENSE* --exclude=**/CHANGELOG* /app/node_modules /
 
@@ -78,17 +72,18 @@ COPY --parents --from=client-builder /app/client/dist /
 
 COPY --parents --from=server-builder /app/dist /
 
-COPY --exclude=client \
-  --exclude=.npmrc \
-  --exclude=.prettierrc \
-  --exclude=.eslintrc.json \
-  --exclude=tsconfig.json \
-  --exclude=package-lock.json \
-  --exclude=src \
-  --exclude=**/*.d.ts \
-  --exclude=**/.gitkeep \
-  Dockerfile/epgstation/epgstation /app
+COPY Dockerfile/epgstation/epgstation/api.yml \
+    Dockerfile/epgstation/epgstation/img \
+    Dockerfile/epgstation/epgstation/ormconfig.js \
+    Dockerfile/epgstation/epgstation/package.json /app/
 
-WORKDIR /app
-ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "/app/dist/index.js"]
+RUN --mount=type=bind,from=busybox:1.35.0-glibc,source=/bin,target=/bin \
+    addgroup -g 44 video && \
+    mkdir -p drop config recorded thumbnail data/key data/streamfiles logs/EPGUpdater logs/Operator logs/Service
+
+LABEL maintainer="fetburner"
+
+EXPOSE 8888
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/nodejs/bin/node", "/app/dist/index.js"]
