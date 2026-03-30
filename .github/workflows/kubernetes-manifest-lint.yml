@@ -43,7 +43,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@v5
 
       - name: Make temporal output directory
         run: mkdir -p out/kustomize
