@@ -1,5 +1,5 @@
 # mirakc-arib, mirakc
-FROM mirakc/mirakc:3.4.21-alpine AS mirakc-image
+FROM mirakc/mirakc:3.4.63-alpine AS mirakc-image
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
