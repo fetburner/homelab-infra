@@ -9,6 +9,6 @@ RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
 
 # final image
 
-FROM busybox:1.37.0-musl
+FROM busybox:1.38.0-musl
 
 COPY --from=build-image /build /
