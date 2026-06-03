@@ -64,7 +64,7 @@ RUN --mount=type=cache,id=server-prod-deps,target=~/.npm,sharing=locked \
     npm install --omit=dev --no-save --loglevel=info
 
 # final image
-FROM busybox:1.37.0-musl
+FROM busybox:1.38.0-musl
 
 COPY --from=ghcr.io/fetburner/ffmpeg:sha-ee1ad2a38d51d7f9b076fed5a7f626e662c27ee2 / /
 
