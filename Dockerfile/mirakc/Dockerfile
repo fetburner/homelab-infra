@@ -19,7 +19,7 @@ COPY --from=ghcr.io/fetburner/recdvb:sha-e3c7ab81b507ce31fa3c6845e72207653374e4c
 
 # final image
 
-FROM busybox:1.37.0-musl
+FROM busybox:1.38.0-musl
 
 COPY --from=mirakc-image /build /
 COPY --parents --from=mirakc-image /etc/mirakc /
