@@ -66,7 +66,7 @@ RUN --mount=type=cache,id=server-prod-deps,target=~/.npm,sharing=locked \
 # final image
 FROM busybox:1.38.0-musl
 
-COPY --from=ghcr.io/fetburner/ffmpeg:sha-ee1ad2a38d51d7f9b076fed5a7f626e662c27ee2 / /
+COPY --from=ghcr.io/fetburner/ffmpeg:sha-0db6fbf8702a49d35f4c33c6f396a2d9800d2e93 / /
 
 COPY --from=node-deps /build /
 
