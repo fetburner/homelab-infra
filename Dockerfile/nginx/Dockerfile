@@ -1,6 +1,6 @@
 FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
 
-FROM nginx:1.31.1-alpine-slim AS nginx-image
+FROM nginx:1.31.2-alpine-slim AS nginx-image
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     set -eux && \
