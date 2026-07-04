@@ -1,10 +1,11 @@
 FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
 
-FROM alpine:3.23.4 AS build-image
+FROM debian:13.5 AS builder
 
-RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk add autoconf automake bash clang cmake curl make pkgconfig linux-headers libc-dev
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends autoconf automake cmake clang make
 
 WORKDIR /tmp/recdvb
 COPY ./Dockerfile/recdvb/recdvb /tmp/recdvb
@@ -21,4 +22,4 @@ RUN --mount=type=bind,from=magicpak-image,target=/mnt \
 # final image
 FROM scratch
 
-COPY --from=build-image /build /
+COPY --from=builder /build /
