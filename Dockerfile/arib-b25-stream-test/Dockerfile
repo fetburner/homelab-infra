@@ -1,11 +1,12 @@
 # additional pcsc tool
-FROM ghcr.io/fetburner/pcsc-tool-build:sha-8b2b005656a41d50ac698f6fc4f1085a076a857c AS pcsc-tool-image
+FROM ghcr.io/fetburner/pcsc-tool-build:sha-7bfbb376e6f3994b7246fd99e630c51b8a4c957b AS pcsc-tool-image
 
-FROM alpine:3.22.2 AS build-image
+FROM debian:13.5 AS builder
 
-RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk add autoconf automake bash clang cmake make pkgconfig linux-headers
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends clang cmake make pkg-config libpcsclite-dev
 
 # additional pcsc tool
 COPY --from=pcsc-tool-image / /
@@ -27,4 +28,4 @@ RUN which arib-b25-stream-test >> cplist && \
 # final image
 FROM scratch
 
-COPY --from=build-image /build /
+COPY --from=builder /build /
