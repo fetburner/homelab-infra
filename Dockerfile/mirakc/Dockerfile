@@ -1,30 +1,36 @@
 # mirakc-arib, mirakc
-FROM mirakc/mirakc:3.4.21-alpine AS mirakc-image
+FROM mirakc/mirakc:3.4.21-debian AS mirakc-image
 
-RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk add gcc libc-dev
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends dash clang
 
 RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
-    /mnt/bin/magicpak -v "$(which mirakc)" "$(which mirakc-arib)" /build
+    /mnt/bin/magicpak -v /bin/sh "$(which timeout)" "$(which mirakc)" "$(which mirakc-arib)" /build
 
-# arib-b25-stream-test
-COPY --from=ghcr.io/fetburner/arib-b25-stream-test:sha-085c401f12ee501e47ee7243881776154194c227 / /build
-
-# recpt1
-COPY --from=ghcr.io/fetburner/recpt1:sha-a4964ca1b5d6e3fa5a2e70e525126d39fc95a09f / /build
-
-# recdvb
-COPY --from=ghcr.io/fetburner/recdvb:sha-e3c7ab81b507ce31fa3c6845e72207653374e4c5 / /build
-
-# final image
-
-FROM busybox:1.38.0-musl
+FROM scratch AS builder
 
 COPY --from=mirakc-image /build /
 COPY --parents --from=mirakc-image /etc/mirakc /
 
+# arib-b25-stream-test
+COPY --from=ghcr.io/fetburner/arib-b25-stream-test:sha-3cb032d81f43ca27ea5b2e4b0fae83e36b819a14 / /
+
+# recpt1
+COPY --from=ghcr.io/fetburner/recpt1:sha-941af914965e01873bb28d94d007c873ee1bc147 / /
+
+# recdvb
+COPY --from=ghcr.io/fetburner/recdvb:sha-3e9860bef025704e621e6a6436b56b6a9fbeec6a / /
+
+# final image
+
+FROM scratch
+
+COPY --from=builder / /
+
 ENV MIRAKC_CONFIG=/etc/mirakc/config.yml
+ENV LD_LIBRARY_PATH=/usr/local/lib
 
 ENTRYPOINT ["/usr/local/bin/mirakc"]
 CMD []
