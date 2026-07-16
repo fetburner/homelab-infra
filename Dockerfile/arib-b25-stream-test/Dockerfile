@@ -20,10 +20,8 @@ WORKDIR /tmp/libaribb25/build
 RUN make -j"$(nproc)" && \
     make install
 
-WORKDIR /tmp/build
-COPY ./script/extractlibrary cp.sh
-RUN which arib-b25-stream-test >> cplist && \
-    ./cp.sh cplist /build
+RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
+    /mnt/bin/magicpak -v "$(which arib-b25-stream-test)" /build
 
 # final image
 FROM scratch
