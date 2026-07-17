@@ -1,16 +1,24 @@
 # FFmpeg build
-FROM alpine:3.24.1 AS ffmpeg-image
+FROM debian:13.5 AS builder
 
 ARG TARGETPLATFORM
 
-RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk add autoconf automake bash binutils bzip2 cmake coreutils diffutils file g++ gcc gperf libtool \
-      make python3 openssl-dev tar yasm nasm zlib-dev expat-dev pkgconfig libass-dev lame-dev opus-dev \
-      libtheora-dev libvorbis-dev libvpx-dev x264-dev x265-dev libva-dev libgcc libstdc++ ca-certificates \
-      libgomp expat git lame-libs libass libvpx opus libtheora libvorbis x264-libs x265-libs && \
+RUN case ${TARGETPLATFORM} in \
+      linux/amd64) sed -i "s/Components: main/Components: main non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources;; \
+    esac
+
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      build-essential autoconf automake libtool nasm yasm pkg-config \
+      libssl-dev zlib1g-dev libexpat1-dev libass-dev libfreetype-dev \
+      libmp3lame-dev libopus-dev libtheora-dev libvorbis-dev libvpx-dev \
+      libx264-dev libx265-dev && \
     case ${TARGETPLATFORM} in \
-      linux/amd64) apk add libva libvdpau-dev libva-intel-driver intel-media-driver libvpl-dev;; \
+      linux/amd64) apt-get install -y --no-install-recommends \
+        libva-dev libvdpau-dev libvpl-dev \
+        i965-va-driver intel-media-va-driver-non-free libmfx-gen1.2;; \
     esac
 
 # aribb24
@@ -19,9 +27,10 @@ COPY ./Dockerfile/ffmpeg/aribb24 /tmp/aribb24
 RUN autoreconf -fiv && \
     ./configure && \
     make -j"$(nproc)" && \
-    make install
+    make install && \
+    ldconfig
 
-#ffmpeg build
+# ffmpeg build
 WORKDIR /tmp/ffmpeg
 COPY ./Dockerfile/ffmpeg/ffmpeg /tmp/ffmpeg
 RUN case ${TARGETPLATFORM} in \
@@ -71,19 +80,25 @@ RUN case ${TARGETPLATFORM} in \
     make -j"$(nproc)" && \
     make install
 
-WORKDIR /tmp/build
-COPY ./script/extractlibrary cp.sh
-RUN which ffmpeg >> cplist && \
-    which ffprobe >> cplist && \
+# hadolint ignore=SC2086
+RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
+    set -eux && \
     case ${TARGETPLATFORM} in \
-      linux/amd64 ) \
-        echo /usr/lib/dri/iHD_drv_video.so >> cplist && \
-        # Add libva-intel-driver manually
-        echo /usr/lib/dri/i965_drv_video.so >> cplist;; \
+      linux/amd64) \
+        extra_inputs="/usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so \
+          /usr/lib/x86_64-linux-gnu/dri/i965_drv_video.so \
+          /usr/lib/x86_64-linux-gnu/libmfx-gen.so.1.2" ;; \
+      *) extra_inputs="" ;; \
     esac && \
-    ./cp.sh cplist /build
+    /mnt/bin/magicpak -v \
+      "$(which ffmpeg)" \
+      "$(which ffprobe)" \
+      $extra_inputs \
+      /build
 
 # final image
 FROM scratch
 
-COPY --from=ffmpeg-image /build /
+COPY --from=builder /build /
+
+ENV LD_LIBRARY_PATH=/usr/local/lib
