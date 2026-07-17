@@ -1,15 +1,16 @@
 # node.js
-FROM node:18-alpine3.21 AS node-deps
+FROM node:18-bookworm-slim AS node-deps
 
-RUN --mount=type=cache,id=apk,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk --update-cache add gcc libc-dev ca-certificates tini
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends clang tini ca-certificates
 
-RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,source=/bin,target=/bin/magicpak \
-    /bin/magicpak/magicpak -v "$(which node)" "$(which tini)" /build --include '/usr/lib/libssl*' --include '/usr/lib/libcrypto*'
+RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
+    /mnt/bin/magicpak -v "$(which node)" "$(which tini)" /build
 
 # EPGStation client build
-FROM --platform=$BUILDPLATFORM node:18-alpine3.21 AS client-builder
+FROM --platform=$BUILDPLATFORM node:18-bookworm-slim AS client-builder
 
 WORKDIR /app/client
 
@@ -27,13 +28,14 @@ COPY ./Dockerfile/epgstation/epgstation /app
 RUN npm run build --loglevel=info
 
 # EPGStation server build
-FROM node:18-alpine3.21 AS server-base
+FROM node:18-bookworm-slim AS server-base
 
 WORKDIR /app
 
-RUN --mount=type=cache,id=apk,target=/var/cache/apk,sharing=locked \
-    set -eux && \
-    apk add g++ make pkgconf python3 py3-pip
+RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends g++ make pkg-config python3
 
 FROM --platform=$BUILDPLATFORM server-base AS server-builder
 
@@ -64,13 +66,13 @@ RUN --mount=type=cache,id=server-prod-deps,target=~/.npm,sharing=locked \
     npm install --omit=dev --no-save --loglevel=info
 
 # final image
-FROM busybox:1.38.0-musl
-
-COPY --from=ghcr.io/fetburner/ffmpeg:sha-0db6fbf8702a49d35f4c33c6f396a2d9800d2e93 / /
+FROM scratch
 
 COPY --from=node-deps /build /
 
-COPY --parents --from=node-deps /etc/ssl /
+COPY --parents --from=node-deps /etc/ssl /etc/passwd /etc/group /
+
+COPY --from=ghcr.io/fetburner/ffmpeg:bdb4e86924921d4186204b934905bb82aabf4092 / /
 
 COPY --parents --from=server-prod-deps --exclude=**/*.d.ts --exclude=**/README* --exclude=**/LICENSE* --exclude=**/CHANGELOG* /app/node_modules /
 
@@ -89,6 +91,8 @@ COPY --exclude=client \
   --exclude=**/.gitkeep \
   Dockerfile/epgstation/epgstation /app
 
+ENV LD_LIBRARY_PATH=/usr/local/lib
+
 WORKDIR /app
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["node", "/app/dist/index.js"]
