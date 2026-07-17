@@ -53,8 +53,8 @@ jobs:
         with:
           dockerfile: Dockerfile/${{ matrix.name }}/Dockerfile
 
-  docker-build:
-    runs-on: ubuntu-latest
+  docker-build-each:
+    runs-on: ${{ matrix.runner }}
     needs:
       - enumerate-dockerfiles
     if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
@@ -62,14 +62,21 @@ jobs:
     strategy:
       matrix:
         name: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.name) }}
+        arch:
+          - amd64
+          - arm64
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
 
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: true
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
         id: setup-buildx
@@ -87,10 +94,9 @@ jobs:
         id: cache
         with:
           path: cache-mount
-          key: cache-mount-${{ matrix.name }}-${{ hashFiles('Dockerfile/**/Dockerfile') }}
+          key: cache-mount-${{ matrix.name }}-${{ matrix.arch }}-${{ hashFiles('Dockerfile/**/Dockerfile') }}
           restore-keys: |
-            cache-mount-${{ matrix.name }}-${{ hashFiles('Dockerfile/**/Dockerfile') }}
-            cache-mount-${{ matrix.name }}-
+            cache-mount-${{ matrix.name }}-${{ matrix.arch }}-
 
       - name: Restore Docker cache mounts
         uses: reproducible-containers/buildkit-cache-dance@v3
@@ -106,17 +112,49 @@ jobs:
         with:
           images: ghcr.io/fetburner/${{ matrix.name }}
           tags: |
-            type=sha,format=long
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
-
+            type=raw,value=${{ github.sha }},suffix=-${{ matrix.arch }}
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile/${{ matrix.name }}/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+          cache-from: type=gha,scope=${{ matrix.name }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}-${{ matrix.arch }}
+
+  finish-docker-build:
+    runs-on: ubuntu-latest
+    needs:
+      - docker-build-each
+      - enumerate-dockerfiles
+    if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
+
+    strategy:
+      matrix:
+        name: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.name) }}
+
+    steps:
+      - name: Login to the Container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: fetburner
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create multi architecture image
+        run: >-
+          docker buildx imagetools create -t
+          ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}
+          ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}-arm64
+          ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}-amd64
+
+      - name: Push latest tag
+        if: ${{ github.ref == format('refs/heads/{0}', 'master') }}
+        run: >-
+          docker buildx imagetools create -t
+          ghcr.io/fetburner/${{ matrix.name }}:latest
+          ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}
+
