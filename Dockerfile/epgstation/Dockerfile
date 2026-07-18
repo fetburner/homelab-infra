@@ -72,7 +72,7 @@ COPY --from=node-deps /build /
 
 COPY --parents --from=node-deps /etc/ssl /etc/passwd /etc/group /
 
-COPY --from=ghcr.io/fetburner/ffmpeg:bdb4e86924921d4186204b934905bb82aabf4092 / /
+COPY --from=ghcr.io/fetburner/ffmpeg:a5ce6541b822a69d132fecda901cbaad60115848 / /
 
 COPY --parents --from=server-prod-deps --exclude=**/*.d.ts --exclude=**/README* --exclude=**/LICENSE* --exclude=**/CHANGELOG* /app/node_modules /
 
