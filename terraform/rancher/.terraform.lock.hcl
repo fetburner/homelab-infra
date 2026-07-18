@@ -5,6 +5,8 @@ provider "registry.terraform.io/rancher/rancher2" {
   version     = "14.1.1"
   constraints = "~> 14.0"
   hashes = [
+    "h1:XguC/YWN5PuuX+oQ9U7HZdrpLZ/z32XFTmWcTZTO/AY=",
+    "h1:bKL/7cYa+LzIPqjMsfac19bcjivHF7CteZtW36WO2Gs=",
     "h1:rbEfIRw5srYsQs/PUY4Z6ywNEXf0hlfRdEBIj58Es74=",
     "zh:11c4c34ba996b633d116e83f48b0baecaa1e0cbf50562abdfd9424cd6f6141a4",
     "zh:205a3a4b5f078b2eeea06f4a13ab15bcf34864460f789568d384a03e47f0a009",
