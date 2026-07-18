@@ -25,7 +25,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "k3s" {
 
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "console_kagawa" {
   account_id = cloudflare_zone.fetburner_dev.account.id
-  tunnel_id  = "e795f54d-0905-4821-8959-4abd659f8d42"
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.console_kagawa.id
   config = {
     ingress = [
       {
@@ -42,7 +42,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "console_kagawa" {
 
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "epgstation" {
   account_id = cloudflare_zone.fetburner_dev.account.id
-  tunnel_id  = "6491c854-dd08-447f-9a31-a8066f197dec"
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.epgstation.id
   config = {
     ingress = [
       {
@@ -59,7 +59,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "epgstation" {
 
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k3s" {
   account_id = cloudflare_zone.fetburner_dev.account.id
-  tunnel_id  = "87e9ac1d-2811-4771-938a-0085766308b2"
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.k3s.id
   config = {
     ingress = [
       {
