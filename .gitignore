@@ -1,2 +1,8 @@
 .DS_Store
 *.swp
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan

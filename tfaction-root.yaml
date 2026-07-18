@@ -1,0 +1,16 @@
+---
+plan_workflow_name: terraform-plan.yaml
+
+target_groups:
+  - working_directory: "terraform/**"
+    runs_on: ubuntu-latest
+    terraform_command: terraform
+
+drift_detection:
+  enabled: false
+
+tflint:
+  enabled: true
+
+trivy:
+  enabled: false
