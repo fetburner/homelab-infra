@@ -4,7 +4,7 @@ terraform {
   required_providers {
     rancher2 = {
       source  = "rancher/rancher2"
-      version = "~> 6.0"
+      version = "~> 14.0"
     }
   }
 
@@ -21,6 +21,7 @@ terraform {
     skip_requesting_account_id  = true
     skip_metadata_api_check     = true
     skip_s3_checksum            = true
+    skip_region_validation      = true
   }
 }
 
