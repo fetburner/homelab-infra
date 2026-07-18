@@ -4,6 +4,9 @@ on:
   push:
     branches-ignore:
       - buildcache
+    paths:
+      - 'Dockerfile/**'
+      - '.github/workflows/docker-image.yml'
 
 permissions:
   contents: read
@@ -46,8 +49,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-        with:
-          submodules: true
 
       - uses: hadolint/hadolint-action@v3.3.0
         with:
@@ -60,6 +61,7 @@ jobs:
     if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
 
     strategy:
+      fail-fast: false
       matrix:
         name: ${{ fromJSON(needs.enumerate-dockerfiles.outputs.name) }}
         arch:
@@ -94,7 +96,7 @@ jobs:
         id: cache
         with:
           path: cache-mount
-          key: cache-mount-${{ matrix.name }}-${{ matrix.arch }}-${{ hashFiles('Dockerfile/**/Dockerfile') }}
+          key: cache-mount-${{ matrix.name }}-${{ matrix.arch }}-${{ hashFiles(format('Dockerfile/{0}/**/Dockerfile', matrix.name)) }}
           restore-keys: |
             cache-mount-${{ matrix.name }}-${{ matrix.arch }}-
 
@@ -131,7 +133,6 @@ jobs:
     needs:
       - docker-build-each
       - enumerate-dockerfiles
-    if: ${{ needs.enumerate-dockerfiles.outputs.name != '' && toJson(fromJson(needs.enumerate-dockerfiles.outputs.name)) != '[]' }}
 
     strategy:
       matrix:
