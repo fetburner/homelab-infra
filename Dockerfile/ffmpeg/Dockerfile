@@ -14,21 +14,12 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
       build-essential autoconf automake libtool nasm yasm pkg-config \
       libssl-dev zlib1g-dev libexpat1-dev libass-dev libfreetype-dev \
       libmp3lame-dev libopus-dev libtheora-dev libvorbis-dev libvpx-dev \
-      libx264-dev libx265-dev && \
+      libx264-dev libx265-dev libaribb24-dev && \
     case ${TARGETPLATFORM} in \
       linux/amd64) apt-get install -y --no-install-recommends \
         libva-dev libvdpau-dev libvpl-dev \
         i965-va-driver intel-media-va-driver-non-free libmfx-gen1.2;; \
     esac
-
-# aribb24
-WORKDIR /tmp/aribb24
-COPY ./Dockerfile/ffmpeg/aribb24 /tmp/aribb24
-RUN autoreconf -fiv && \
-    ./configure && \
-    make -j"$(nproc)" && \
-    make install && \
-    ldconfig
 
 # ffmpeg build
 WORKDIR /tmp/ffmpeg
