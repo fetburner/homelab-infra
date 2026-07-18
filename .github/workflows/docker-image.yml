@@ -113,6 +113,7 @@ jobs:
           images: ghcr.io/fetburner/${{ matrix.name }}
           tags: |
             type=raw,value=${{ github.sha }},suffix=-${{ matrix.arch }}
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
@@ -144,17 +145,22 @@ jobs:
           username: fetburner
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/fetburner/${{ matrix.name }}
+          tags: |
+            type=raw,value=${{ github.sha }}
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Create multi architecture image
-        run: >-
-          docker buildx imagetools create -t
-          ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}
-          ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}-arm64
-          ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}-amd64
-
-      - name: Push latest tag
-        if: ${{ github.ref == format('refs/heads/{0}', 'master') }}
-        run: >-
-          docker buildx imagetools create -t
-          ghcr.io/fetburner/${{ matrix.name }}:latest
-          ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}
-
+        run: |
+          for tag in $TAGS; do
+            IMAGETOOLS_ARGS+=(-t "$tag")
+          done
+          docker buildx imagetools create "${IMAGETOOLS_ARGS[@]}" \
+            ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}-arm64 \
+            ghcr.io/fetburner/${{ matrix.name }}:${{ github.sha }}-amd64
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
