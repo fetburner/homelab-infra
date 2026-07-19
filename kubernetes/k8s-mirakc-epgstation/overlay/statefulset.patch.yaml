@@ -54,6 +54,9 @@ spec:
       nodeName: js50
       containers:
         - name: epgstation
+          envFrom:
+            - secretRef:
+                name: tidb-serverless
           resources:
             requests:
               cpu: 0.1
@@ -76,36 +79,6 @@ spec:
               mountPath: /app/data/streamfiles
             - name: epgstation-epgstation-recorded
               mountPath: /app/recorded
-      initContainers:
-        - name: interpolate-epgstation-config
-          image: ghcr.io/fetburner/envsubst
-          command:
-            - "sh"
-            - "-c"
-            - |
-              cp --archive --parents --no-dereference /app/config /tmp &&
-              for file in $(find /app/config -type f); do
-                envsubst < $file > /tmp/$file;
-              done
-          envFrom:
-            - secretRef:
-                name: tidb-serverless
-          volumeMounts:
-            - name: epgstation-config
-              mountPath: /tmp/app/config
-            - name: epgstation-raw-config
-              mountPath: /app/config
-          securityContext:
-            readOnlyRootFilesystem: true
-          resources:
-            requests:
-              cpu: 0.1
-              memory: 16M
-              ephemeral-storage: 16M
-            limits:
-              cpu: 0.2
-              memory: 32M
-              ephemeral-storage: 16M
       volumes:
         - name: epgstation-graphics-driver
           hostPath:
@@ -114,13 +87,9 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 16Mi
-        - name: epgstation-raw-config
+        - name: epgstation-config
           configMap:
             name: epgstation-epgstation
-        - name: epgstation-config
-          emptyDir:
-            medium: Memory
-            sizeLimit: 1Mi
   volumeClaimTemplates:
     - metadata:
         labels:

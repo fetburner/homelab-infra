@@ -6,8 +6,8 @@ dbtype: mysql
 mysql:
     host: gateway01.ap-northeast-1.prod.aws.tidbcloud.com
     port: 4000
-    user: '${MYSQL_USER}'
-    password: '${MYSQL_PASSWORD}'
+    user: !env MYSQL_USER
+    password: !env MYSQL_PASSWORD
     database: epgstation
     ssl:
       rejectUnauthorized: true
