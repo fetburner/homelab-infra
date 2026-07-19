@@ -266,3 +266,13 @@ resource "cloudflare_zero_trust_access_identity_provider" "github" {
     user_deprovision         = false
   }
 }
+
+resource "cloudflare_r2_bucket" "epgstation_asset" {
+  account_id = cloudflare_zone.fetburner_dev.account.id
+  name       = "epgstation-asset"
+}
+
+resource "cloudflare_r2_bucket" "rancher_backup" {
+  account_id = cloudflare_zone.fetburner_dev.account.id
+  name       = "rancher-backup"
+}

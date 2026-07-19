@@ -65,8 +65,7 @@ RUN --mount=type=cache,id=server-prod-deps,target=~/.npm,sharing=locked \
     npm config set fetch-retry-maxtimeout 600000 && \
     npm install --omit=dev --no-save --loglevel=info
 
-# final image
-FROM scratch
+FROM scratch AS builder
 
 COPY --from=node-deps /build /
 
@@ -91,7 +90,10 @@ COPY --exclude=client \
   --exclude=**/.gitkeep \
   Dockerfile/epgstation/epgstation /app
 
-ENV LD_LIBRARY_PATH=/usr/local/lib
+# final image
+FROM scratch
+
+COPY --from=builder / /
 
 WORKDIR /app
 ENTRYPOINT ["/usr/bin/tini", "--"]
