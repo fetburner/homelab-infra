@@ -1,6 +1,6 @@
 FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
 
-FROM debian:13.5 AS builder
+FROM debian:13.6 AS builder
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
