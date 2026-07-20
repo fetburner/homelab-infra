@@ -1,5 +1,5 @@
 # mirakc-arib, mirakc
-FROM mirakc/mirakc:3.4.76-debian AS mirakc-image
+FROM mirakc/mirakc:3.4.77-debian AS mirakc-image
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
