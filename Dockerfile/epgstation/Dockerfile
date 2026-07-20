@@ -4,10 +4,10 @@ FROM node:18-bookworm-slim AS node-deps
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update && \
-    apt-get install -y --no-install-recommends clang tini ca-certificates
+    apt-get install -y --no-install-recommends dash clang tini ca-certificates
 
 RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
-    /mnt/bin/magicpak -v "$(which node)" "$(which tini)" /build
+    /mnt/bin/magicpak -v /bin/sh "$(which node)" "$(which tini)" /build
 
 # EPGStation client build
 FROM --platform=$BUILDPLATFORM node:18-bookworm-slim AS client-builder
