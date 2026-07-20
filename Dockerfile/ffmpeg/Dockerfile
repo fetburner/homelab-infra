@@ -1,5 +1,5 @@
 # FFmpeg build
-FROM debian:13.5 AS builder
+FROM debian:13.6 AS builder
 
 ARG TARGETPLATFORM
 
