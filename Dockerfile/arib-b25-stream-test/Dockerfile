@@ -1,7 +1,7 @@
 # additional pcsc tool
 FROM ghcr.io/fetburner/pcsc-tool-build:sha-7bfbb376e6f3994b7246fd99e630c51b8a4c957b AS pcsc-tool-image
 
-FROM debian:13.5 AS builder
+FROM debian:13.6 AS builder
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
