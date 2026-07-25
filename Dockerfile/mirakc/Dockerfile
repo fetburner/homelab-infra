@@ -7,7 +7,7 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get install -y --no-install-recommends dash clang
 
 RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
-    /mnt/bin/magicpak -v /bin/sh "$(which timeout)" "$(which mirakc)" "$(which mirakc-arib)" /build
+    /mnt/bin/magicpak -v /bin/sh "$(which timeout)" "$(which cat)" "$(which dd)" "$(which tail)" "$(which mirakc)" "$(which mirakc-arib)" /build
 
 FROM scratch AS builder
 
