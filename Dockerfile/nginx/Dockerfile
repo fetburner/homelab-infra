@@ -1,6 +1,6 @@
 FROM magicpak/debian:magicpak1.4.0 AS magicpak-image
 
-FROM nginx:1.31.3-trixie AS nginx-image
+FROM nginx:1.31.4-trixie AS nginx-image
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
