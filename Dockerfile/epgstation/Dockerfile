@@ -1,5 +1,5 @@
 # node.js
-FROM node:18-bookworm-slim AS node-deps
+FROM node:26-bookworm-slim AS node-deps
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -10,7 +10,7 @@ RUN --mount=type=bind,from=magicpak/debian:magicpak1.4.0,target=/mnt \
     /mnt/bin/magicpak -v /bin/sh "$(which node)" "$(which tini)" /build
 
 # EPGStation client build
-FROM --platform=$BUILDPLATFORM node:18-bookworm-slim AS client-builder
+FROM --platform=$BUILDPLATFORM node:26-bookworm-slim AS client-builder
 
 WORKDIR /app/client
 
@@ -28,7 +28,7 @@ COPY ./Dockerfile/epgstation/epgstation /app
 RUN npm run build --loglevel=info
 
 # EPGStation server build
-FROM node:18-bookworm-slim AS server-base
+FROM node:26-bookworm-slim AS server-base
 
 WORKDIR /app
 
