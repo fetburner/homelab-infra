@@ -84,6 +84,17 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k3s" {
   }
 }
 
+resource "cloudflare_dns_record" "rokuban" {
+  content  = "${cloudflare_zero_trust_tunnel_cloudflared.k3s.id}.cfargotunnel.com"
+  name     = "rokuban.${cloudflare_zone.fetburner_dev.name}"
+  proxied  = true
+  tags     = []
+  ttl      = 1
+  type     = "CNAME"
+  zone_id  = cloudflare_zone.fetburner_dev.id
+  settings = {}
+}
+
 resource "cloudflare_dns_record" "mx_route1" {
   content  = "route1.mx.cloudflare.net"
   name     = cloudflare_zone.fetburner_dev.name
