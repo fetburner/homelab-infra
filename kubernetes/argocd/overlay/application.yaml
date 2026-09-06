@@ -61,6 +61,26 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: rokuban
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rokuban
+  project: default
+  source:
+    path: kubernetes/rokuban
+    repoURL: https://github.com/fetburner/homelab-infra
+    targetRevision: HEAD
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: rook-ceph
 spec:
   destination:

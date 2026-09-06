@@ -68,6 +68,11 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k3s" {
         origin_request = {}
       },
       {
+        hostname       = "rokuban.${cloudflare_zone.fetburner_dev.name}"
+        service        = "http://rokuban-api.rokuban.svc.cluster.local:40773"
+        origin_request = {}
+      },
+      {
         hostname       = "rancher.${cloudflare_zone.fetburner_dev.name}"
         service        = "http://rancher.cattle-system.svc.cluster.local"
         origin_request = {}
@@ -190,6 +195,28 @@ resource "cloudflare_zero_trust_access_application" "epgstation_qa" {
     uri  = "epgstation-qa.${cloudflare_zone.fetburner_dev.name}"
   }]
   policies = [{
+    id         = "36afc495-09a3-4052-a141-a47826c936e6"
+    precedence = 1
+  }]
+}
+
+resource "cloudflare_zero_trust_access_application" "rokuban" {
+  account_id                 = cloudflare_zone.fetburner_dev.account.id
+  name                       = "rokuban"
+  type                       = "self_hosted"
+  domain                     = "rokuban.${cloudflare_zone.fetburner_dev.name}"
+  session_duration           = "24h"
+  app_launcher_visible       = true
+  auto_redirect_to_identity  = false
+  enable_binding_cookie      = false
+  http_only_cookie_attribute = true
+  options_preflight_bypass   = false
+  destinations = [{
+    type = "public"
+    uri  = "rokuban.${cloudflare_zone.fetburner_dev.name}"
+  }]
+  policies = [{
+    # epgstation-qa と同じ Access policy（GitHub 認証、本人メールアドレス、JP 制限）。
     id         = "36afc495-09a3-4052-a141-a47826c936e6"
     precedence = 1
   }]

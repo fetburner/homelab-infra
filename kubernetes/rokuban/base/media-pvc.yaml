@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rokuban-media
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: media
+    app.kubernetes.io/part-of: rokuban
+spec:
+  storageClassName: ds420plus-kagawa
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 32Gi

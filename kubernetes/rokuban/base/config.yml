@@ -1,0 +1,93 @@
+# 初期は docker-compose の server --all 相当で動かす。
+# role を分ける段階で worker.periodic_jobs を false にし、CronJob/KEDA を追加する。
+
+server:
+  listen: ":40773"
+  allowed_hosts: [rokuban.fetburner.dev]
+
+db:
+  # Neon の direct endpoint を Secret から注入する。
+  # monolith は LISTEN/advisory lock を使うため、pooler endpoint ではなく direct
+  # endpoint を指定する。Neon の認証情報は secret.example.yaml の手順で投入する。
+  host: ${POSTGRES_HOST}
+  port: 5432
+  user: ${POSTGRES_USER}
+  password: >-
+    ${POSTGRES_PASSWORD}
+  database: ${POSTGRES_DB}
+  sslmode: require
+
+mirakcs:
+  - site: default
+    # EPGStation namespace の既存 mirakc Service（headless）を共有する。
+    url: http://mirakc.epgstation.svc.cluster.local:40772
+
+worker:
+  periodic_jobs: true
+
+encode:
+  ffmpeg: ffmpeg
+  ffprobe: ffprobe
+  concurrency: 1
+  thumbnail_concurrency: 1
+  # Intel GPU の VAAPI を使う初期プロファイル。
+  # ルールや API からはこの名前（h264_vaapi）を指定する。
+  profiles:
+    - name: h264_vaapi
+      container: mp4
+      video_codec: h264_vaapi
+      audio_codec: aac
+      height: 720
+      scaler: vaapi
+      qp: 24
+      hwaccel:
+        kind: vaapi
+        device: /dev/dri/renderD128
+        output_format: vaapi
+
+storage:
+  media_dir: /mnt/media
+  scratch_dir: /var/tmp/rokuban
+
+ingest:
+  concurrency: 2
+
+epg:
+  sync_interval: 10m
+  retention_grace: 24h
+
+live:
+  # 初期は docker-compose 相当の最小構成として無効化しておく。
+  # KEDA/role 分割後に enabled を true にすれば、ここで定義したプロファイルを使える。
+  enabled: false
+  segment_dir: /dev/shm/rokuban-live
+  max_sessions: 4
+  idle_timeout: 30s
+  tuner_priority: 1
+  hwaccel:
+    kind: vaapi
+    device: /dev/dri/renderD128
+    output_format: vaapi
+  profiles:
+    - name: h264
+      video_codec: h264_vaapi
+      audio_codec: aac
+      height: 720
+      scaler: vaapi
+      qp: 26
+      segment_seconds: 2
+      playlist_size: 6
+    - name: h264-low
+      video_codec: h264_vaapi
+      audio_codec: aac
+      height: 360
+      scaler: vaapi
+      qp: 28
+      segment_seconds: 2
+      playlist_size: 6
+  # 現在の Debian FFmpeg には libaribcaption を含めていないため無効。
+  captions: false
+
+log:
+  level: info
+  format: json

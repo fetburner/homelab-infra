@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: rokuban
+
+resources:
+  - ../base
+
+patches:
+  - path: deployment.patch.yaml
+
+images:
+  # Dockerfile/rokuban-full を追加した commit の multi-arch image。
+  - name: ghcr.io/fetburner/rokuban-full
+    newTag: 658e717cfa4a1f0b6cdab693a2fba1255366bfaf

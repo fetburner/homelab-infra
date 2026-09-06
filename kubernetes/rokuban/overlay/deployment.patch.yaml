@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rokuban
+spec:
+  template:
+    spec:
+      # EPGStation と同じ Intel GPU ノードを使う。mirakc の DVB ノードとは
+      # 別用途なので、チューナーの nodeSelector はここでは付けない。
+      nodeName: js50
+      # Debian/Ubuntu の標準的な video/render グループ。ホストの /dev/dri
+      # を non-root の rokuban から利用するために補助グループへ追加する。
+      securityContext:
+        supplementalGroups:
+          - 44
+          - 107
+      containers:
+        - name: rokuban
+          volumeMounts:
+            - name: graphics-driver
+              mountPath: /dev/dri
+      volumes:
+        - name: graphics-driver
+          hostPath:
+            path: /dev/dri
+            type: Directory
