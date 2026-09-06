@@ -57,9 +57,9 @@ epg:
   retention_grace: 24h
 
 live:
-  # 初期は docker-compose 相当の最小構成として無効化しておく。
-  # KEDA/role 分割後に enabled を true にすれば、ここで定義したプロファイルを使える。
-  enabled: false
+  # 単一 Pod の server --all でライブも提供する。KEDA/role 分割後も
+  # streamer 側へこの設定を引き継ぐ。
+  enabled: true
   segment_dir: /dev/shm/rokuban-live
   max_sessions: 4
   idle_timeout: 30s

@@ -98,14 +98,15 @@ spec:
               mountPath: /mnt/media
             - name: scratch
               mountPath: /var/tmp/rokuban
-            # live.segment_dir 用。live.enabled=false の間も先に用意しておく。
+            # live.segment_dir 用の tmpfs。
             - name: live-shm
               mountPath: /dev/shm
           securityContext:
-            allowPrivilegeEscalation: false
+            # /dev/dri は hostPath で渡しており、このクラスタには GPU device
+            # plugin がないため、デバイス cgroup 制限を越えるには privileged が必要。
+            # プロセスの UID/GID は Pod securityContext の non-root のまま維持する。
+            privileged: true
             readOnlyRootFilesystem: true
-            capabilities:
-              drop: ["ALL"]
           resources:
             requests:
               cpu: 100m

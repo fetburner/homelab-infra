@@ -8,12 +8,12 @@ spec:
       # EPGStation と同じ Intel GPU ノードを使う。mirakc の DVB ノードとは
       # 別用途なので、チューナーの nodeSelector はここでは付けない。
       nodeName: js50
-      # Debian/Ubuntu の標準的な video/render グループ。ホストの /dev/dri
-      # を non-root の rokuban から利用するために補助グループへ追加する。
+      # js50 の /dev/dri は video=44、render=992。ホストの /dev/dri を
+      # non-root の rokuban から利用するために補助グループへ追加する。
       securityContext:
         supplementalGroups:
           - 44
-          - 107
+          - 992
       containers:
         - name: rokuban
           volumeMounts:
