@@ -216,8 +216,7 @@ resource "cloudflare_zero_trust_access_application" "rokuban" {
     uri  = "rokuban.${cloudflare_zone.fetburner_dev.name}"
   }]
   policies = [{
-    # epgstation-qa と同じ Access policy（GitHub 認証、本人メールアドレス、JP 制限）。
-    id         = "36afc495-09a3-4052-a141-a47826c936e6"
+    id         = cloudflare_zero_trust_access_policy.fetburner.id
     precedence = 1
   }]
 }
