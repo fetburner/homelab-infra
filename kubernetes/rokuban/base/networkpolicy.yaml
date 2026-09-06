@@ -46,7 +46,7 @@ spec:
               kubernetes.io/metadata.name: cloudflared
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: cloudflared
+              pod: cloudflared
       ports:
         - protocol: TCP
           port: 40773
