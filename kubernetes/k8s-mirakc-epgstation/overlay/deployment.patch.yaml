@@ -7,6 +7,7 @@ spec:
     spec:
       containers:
         - name: nginx
+          image: ghcr.io/fetburner/nginx:4d4a10284d91ce5a90c961edf6c6008252797bda
           resources:
             limits:
               cpu: 0.5

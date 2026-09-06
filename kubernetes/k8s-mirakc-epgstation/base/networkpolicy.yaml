@@ -104,6 +104,8 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: epgstation-epgstation
+        - ipBlock:
+            cidr: 192.168.0.0/16
       ports:
         - protocol: TCP
           port: 40772

@@ -9,6 +9,7 @@ spec:
         epgstation.fetburner.dev/tuner: dvb
       containers:
         - name: mirakc
+          image: ghcr.io/fetburner/mirakc:bded984063399f26b1ad4bdda89039772cf1ef70
           env:
             - name: RUST_LOG
               value: info
@@ -17,6 +18,10 @@ spec:
               mountPath: /dev/dvb
             - name: epgstation-mirakc-epg
               mountPath: /var/lib/mirakc/epg
+            - name: epgstation-mirakc-records
+              mountPath: /var/lib/mirakc/records
+            - name: epgstation-mirakc-recording
+              mountPath: /var/lib/mirakc/recording
           resources:
             requests:
               cpu: 0.1
@@ -43,6 +48,30 @@ spec:
         resources:
           requests:
             storage: 32Mi
+    - metadata:
+        labels:
+          app.kubernetes.io/name: epgstation-mirakc-records
+          app.kubernetes.io/part-of: epgstation
+        name: epgstation-mirakc-records
+      spec:
+        storageClassName: longhorn
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 32Mi
+    - metadata:
+        labels:
+          app.kubernetes.io/name: epgstation-mirakc-recording
+          app.kubernetes.io/part-of: epgstation
+        name: epgstation-mirakc-recording
+      spec:
+        storageClassName: longhorn
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -54,6 +83,7 @@ spec:
       nodeName: js50
       containers:
         - name: epgstation
+          image: ghcr.io/fetburner/epgstation:cb68f1aaab1e67ead03cd0f491ea797dd44115e0
           envFrom:
             - secretRef:
                 name: tidb-serverless

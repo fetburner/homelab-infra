@@ -5,6 +5,10 @@ server:
 epg:
   cache-dir: /var/lib/mirakc/epg
 
+recording:
+  basedir: /var/lib/mirakc/recording
+  records-dir: /var/lib/mirakc/records
+
 tuners:
   - name: PX-S1UD_T1
     types:
