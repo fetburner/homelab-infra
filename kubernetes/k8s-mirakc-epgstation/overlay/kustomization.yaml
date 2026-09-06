@@ -6,7 +6,6 @@ namespace: epgstation
 resources:
   - ../base
   - pvc.yaml
-  - sealedsecret.yaml
   - poddisruptionbudget.yaml
   - horizontalpodautoscaler.yaml
 

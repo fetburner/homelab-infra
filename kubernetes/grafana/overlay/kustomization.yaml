@@ -6,7 +6,6 @@ namespace: grafana
 resources:
   - ../base
   - pvc.yaml
-  - sealedsecret.yaml
   - objectbucketclaim.yaml
   - poddisruptionbudget.yaml
   - horizontalpodautoscaler.yaml
