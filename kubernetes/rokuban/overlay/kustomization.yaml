@@ -12,4 +12,4 @@ patches:
 images:
   # Dockerfile/rokuban-full を追加した commit の multi-arch image。
   - name: ghcr.io/fetburner/rokuban-full
-    newTag: 658e717cfa4a1f0b6cdab693a2fba1255366bfaf
+    newTag: bb87ceaa24a9267690e081e5711991afaca43b32
