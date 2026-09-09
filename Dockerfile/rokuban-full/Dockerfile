@@ -1,10 +1,4 @@
-# FFmpeg 入りイメージのビルド例。
-# 公式イメージは ffmpeg を含まないため、エンコード／サムネイルの worker で使う
-# イメージをこのリポジトリの CI からビルドする。GHCR では private パッケージとして扱う。
-
-ARG BASE=ghcr.io/fetburner/rokuban:latest
-
-FROM ${BASE}
+FROM ghcr.io/fetburner/rokuban:d66978ef63d0705c594167d9bb567970a8b84db4
 USER root
 ARG TARGETARCH
 # EPGStation と同じ Intel GPU を使えるよう、amd64 には VA-API（i965 / iHD）と
