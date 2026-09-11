@@ -1,3 +1,5 @@
 ignored:
   - DL3008
   - DL3018
+  # upstream rokuban が nobody で動く前提。数値 UID にすると base と食い違う。
+  - DL3066
