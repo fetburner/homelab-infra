@@ -37,7 +37,7 @@ encode:
       container: mp4
       video_codec: h264_vaapi
       audio_codec: aac
-      height: 720
+      height: 1080
       scaler: vaapi
       qp: 24
       hwaccel:
