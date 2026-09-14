@@ -42,6 +42,7 @@ encode:
       audio_codec: aac
       height: 1080
       scaler: vaapi
+      deinterlace: true
       qp: 24
       hwaccel:
         kind: vaapi
@@ -77,6 +78,7 @@ live:
       audio_codec: aac
       height: 720
       scaler: vaapi
+      deinterlace: true
       qp: 26
       segment_seconds: 2
       playlist_size: 6
@@ -85,6 +87,7 @@ live:
       audio_codec: aac
       height: 360
       scaler: vaapi
+      deinterlace: true
       qp: 28
       segment_seconds: 2
       playlist_size: 6

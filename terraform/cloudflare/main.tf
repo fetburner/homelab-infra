@@ -69,7 +69,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "k3s" {
       },
       {
         hostname       = "rokuban.${cloudflare_zone.fetburner_dev.name}"
-        service        = "http://rokuban-api.rokuban.svc.cluster.local:40773"
+        service        = "http://traefik.kube-system.svc.cluster.local:80"
         origin_request = {}
       },
       {
