@@ -5,8 +5,8 @@ metadata:
 spec:
   template:
     spec:
-      # EPGStation と同じ Intel GPU ノードを使う。mirakc の DVB ノードとは
-      # 別用途なので、チューナーの nodeSelector はここでは付けない。
+      # worker（encode / thumbnail）は EPGStation と同じ Intel GPU ノードを使う。
+      # mirakc の DVB ノードとは別用途なので、チューナーの nodeSelector は付けない。
       nodeName: js50
       # js50 の /dev/dri は video=44、render=992。ホストの /dev/dri を
       # non-root の rokuban から利用するために補助グループへ追加する。

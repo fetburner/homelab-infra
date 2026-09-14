@@ -1,22 +1,27 @@
+# worker ロール（monolith の残り）。api / notifier / streamer / watcher は
+# api.yaml / notifier.yaml / streamer.yaml / watcher.yaml へ分離した。
+# worker は encode / thumbnail で VAAPI を使うため /dev/dri を要し、ingest /
+# reconciler など site 束縛キューを引くため --sites default が必須。
+# /dev/dri の nodeName pin と supplementalGroups は overlay で当てる。
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rokuban
   labels:
     app.kubernetes.io/name: rokuban
-    app.kubernetes.io/component: monolith
+    app.kubernetes.io/component: worker
     app.kubernetes.io/part-of: rokuban
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: rokuban
-      app.kubernetes.io/component: monolith
+      app.kubernetes.io/component: worker
   template:
     metadata:
       labels:
         app.kubernetes.io/name: rokuban
-        app.kubernetes.io/component: monolith
+        app.kubernetes.io/component: worker
         app.kubernetes.io/part-of: rokuban
       annotations:
         prometheus.io/scrape: "true"
@@ -36,34 +41,11 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
-      initContainers:
-        - name: migrate
-          image: ghcr.io/fetburner/rokuban-full:latest
-          imagePullPolicy: Always
-          args: ["migrate", "up", "--config", "/etc/rokuban/config.yml"]
-          envFrom:
-            - secretRef:
-                name: rokuban-secrets
-          volumeMounts:
-            - name: config
-              mountPath: /etc/rokuban
-              readOnly: true
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop: ["ALL"]
-          resources:
-            requests:
-              cpu: 50m
-              memory: 64Mi
-            limits:
-              memory: 256Mi
       containers:
         - name: rokuban
           image: ghcr.io/fetburner/rokuban-full:latest
           imagePullPolicy: Always
-          args: ["server", "--all", "--config", "/etc/rokuban/config.yml"]
+          args: ["server", "--roles", "worker", "--sites", "default", "--config", "/etc/rokuban/config.yml"]
           envFrom:
             - secretRef:
                 name: rokuban-secrets
@@ -98,13 +80,9 @@ spec:
               mountPath: /mnt/media
             - name: scratch
               mountPath: /var/tmp/rokuban
-            # live.segment_dir 用の tmpfs。
-            - name: live-shm
-              mountPath: /dev/shm
           securityContext:
-            # /dev/dri は hostPath で渡しており、このクラスタには GPU device
-            # plugin がないため、デバイス cgroup 制限を越えるには privileged が必要。
-            # プロセスの UID/GID は Pod securityContext の non-root のまま維持する。
+            # /dev/dri は hostPath で渡しており、クラスタには GPU device plugin が
+            # 無いため、デバイス cgroup 制限を越えるには privileged が必要。
             privileged: true
             readOnlyRootFilesystem: true
           resources:
@@ -125,7 +103,3 @@ spec:
             claimName: rokuban-media
         - name: scratch
           emptyDir: {}
-        - name: live-shm
-          emptyDir:
-            medium: Memory
-            sizeLimit: 256Mi

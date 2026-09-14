@@ -27,19 +27,38 @@ spec:
         - protocol: UDP
           port: 53
 ---
+# 常駐ロール（api / notifier / streamer / worker / watcher）に共通の egress。
+# api / notifier は mirakc を要求しないが、コード境界（不変条件 1、depguard）で
+# 保証しており、homelab では ingress 経路をロールまとめて簡素に保つ。
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: rokuban-allow
 spec:
   podSelector:
-    matchLabels:
-      app.kubernetes.io/name: rokuban
-      app.kubernetes.io/component: monolith
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: [rokuban]
+      - key: app.kubernetes.io/component
+        operator: In
+        values: [api, notifier, streamer, worker, watcher]
   policyTypes:
     - Ingress
     - Egress
   ingress:
+    # traefik（IngressController）経由の L7。cluster 内では traefik が kube-system に居る。
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 40773
+    # 移行期は cloudflared から rokuban-api への直行も残す。
     - from:
         - namespaceSelector:
             matchLabels:
@@ -50,6 +69,7 @@ spec:
       ports:
         - protocol: TCP
           port: 40773
+    # メトリクス scrape（Prometheus / thanos-sidecar）。
     - from:
         - namespaceSelector:
             matchLabels:
@@ -61,6 +81,7 @@ spec:
         - protocol: TCP
           port: 40773
   egress:
+    # mirakc（チューナー）への到達。watcher / worker(ingest) / streamer(ライブ pull) が使う。
     - to:
         - namespaceSelector:
             matchLabels:
@@ -71,6 +92,40 @@ spec:
       ports:
         - protocol: TCP
           port: 40772
+    # Neon direct endpoint。
+    - ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: rokuban-migrate-allow
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rokuban
+      app.kubernetes.io/component: migrate
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: rokuban-enqueue-allow
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rokuban
+      app.kubernetes.io/component: enqueue
+  policyTypes:
+    - Egress
+  egress:
+    # enqueue は insert-only の River クライアントで、触るのは DB だけ。
     - ports:
         - protocol: TCP
           port: 5432

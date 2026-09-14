@@ -2,7 +2,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+  - api.yaml
+  - notifier.yaml
+  - streamer.yaml
+  - watcher.yaml
   - deployment.yaml
+  - migrate-job.yaml
+  - cronjobs.yaml
+  - pdb.yaml
   - media-pvc.yaml
   - networkpolicy.yaml
   - service.yaml

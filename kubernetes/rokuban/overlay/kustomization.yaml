@@ -5,11 +5,15 @@ namespace: rokuban
 
 resources:
   - ../base
+  - ingress.yaml
 
 patches:
   - path: deployment.patch.yaml
+  - path: streamer.patch.yaml
 
 images:
   # Dockerfile/rokuban-full を追加した commit の multi-arch image。
+  # NOTE: /api/media（#826）を含めるには FROM を main HEAD に bump したイメージへ
+  # 差し替えが必要。ビルド後、この newTag を新しい sha に更新する。
   - name: ghcr.io/fetburner/rokuban-full
-    newTag: b420d7955923cadb7557fc136d087c6470f32329
+    newTag: d91de920696d186ebb18c51ab102a1a3216e9de2

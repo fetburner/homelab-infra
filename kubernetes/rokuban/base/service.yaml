@@ -4,13 +4,52 @@ metadata:
   name: rokuban-api
   labels:
     app.kubernetes.io/name: rokuban
-    app.kubernetes.io/component: monolith
+    app.kubernetes.io/component: api
     app.kubernetes.io/part-of: rokuban
 spec:
   type: ClusterIP
   selector:
     app.kubernetes.io/name: rokuban
-    app.kubernetes.io/component: monolith
+    app.kubernetes.io/component: api
+  ports:
+    - name: http
+      port: 40773
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rokuban-notifier
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: notifier
+    app.kubernetes.io/part-of: rokuban
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: notifier
+  ports:
+    - name: http
+      port: 40773
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rokuban-streamer
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: streamer
+    app.kubernetes.io/part-of: rokuban
+spec:
+  type: ClusterIP
+  # 録画配信に sticky は書かない（バイト Range が分散しなくなるため）。
+  selector:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: streamer
   ports:
     - name: http
       port: 40773

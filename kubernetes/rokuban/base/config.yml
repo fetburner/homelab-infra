@@ -23,7 +23,10 @@ mirakcs:
     url: http://mirakc.epgstation.svc.cluster.local:40772
 
 worker:
-  periodic_jobs: true
+  # 定期ジョブは in-process では投げない。River の PeriodicJobs はリーダーだけが
+  # 投入するので、worker を 0 にスケールする構成では誰も投入しなくなる。投入は
+  # CronJob（rokuban enqueue）が担う。
+  periodic_jobs: false
 
 encode:
   ffmpeg: ffmpeg
