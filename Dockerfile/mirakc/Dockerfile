@@ -1,5 +1,17 @@
 # mirakc-arib, mirakc
+FROM rust:1.98.1-trixie AS mirakc-build
+
+ARG MIRAKC_REF=cat-to-tokio-fs
+RUN git clone --depth=1 --branch "$MIRAKC_REF" https://github.com/fetburner/mirakc.git /src
+
+WORKDIR /src
+RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
+    --mount=type=cache,target=/src/target,sharing=locked \
+    cargo build --locked --release --bin mirakc && \
+    cp target/release/mirakc /usr/local/bin/mirakc
+
 FROM mirakc/mirakc:main-debian AS mirakc-image
+COPY --from=mirakc-build /usr/local/bin/mirakc /usr/local/bin/mirakc
 
 RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
     --mount=type=cache,target=/var/cache/apt,sharing=locked \
