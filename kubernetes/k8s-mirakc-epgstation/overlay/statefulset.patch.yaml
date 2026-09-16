@@ -9,7 +9,7 @@ spec:
         epgstation.fetburner.dev/tuner: dvb
       containers:
         - name: mirakc
-          image: ghcr.io/fetburner/mirakc:bded984063399f26b1ad4bdda89039772cf1ef70
+          image: ghcr.io/fetburner/mirakc:754b3b40db2abdb1b42e54fc8c194af69f0ccc37
           env:
             - name: RUST_LOG
               value: info
