@@ -29,7 +29,7 @@ spec:
               ephemeral-storage: 50M
             limits:
               cpu: 2
-              memory: 256M
+              memory: 512M
               ephemeral-storage: 50M
       volumes:
         - name: mirakc-tuner
