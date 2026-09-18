@@ -1,4 +1,4 @@
-FROM ghcr.io/fetburner/rokuban:83ad8c7a94afac77e34e340bd37b2902b792093c
+FROM ghcr.io/fetburner/rokuban:4c11c3e6e14533ace9879ed013d28d5291084b0d
 USER root
 ARG TARGETARCH
 # EPGStation と同じ Intel GPU を使えるよう、amd64 には VA-API（i965 / iHD）と
