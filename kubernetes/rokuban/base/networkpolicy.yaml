@@ -92,10 +92,10 @@ spec:
       ports:
         - protocol: TCP
           port: 40772
-    # Neon direct endpoint。
+    # NAS PostgreSQL。
     - ports:
         - protocol: TCP
-          port: 5432
+          port: 5433
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -111,7 +111,7 @@ spec:
   egress:
     - ports:
         - protocol: TCP
-          port: 5432
+          port: 5433
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -128,4 +128,4 @@ spec:
     # enqueue は insert-only の River クライアントで、触るのは DB だけ。
     - ports:
         - protocol: TCP
-          port: 5432
+          port: 5433

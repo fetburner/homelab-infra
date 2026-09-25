@@ -6,16 +6,15 @@ server:
   allowed_hosts: [rokuban.fetburner.dev]
 
 db:
-  # Neon の direct endpoint を Secret から注入する。
-  # monolith は LISTEN/advisory lock を使うため、pooler endpoint ではなく direct
-  # endpoint を指定する。Neon の認証情報は secret.example.yaml の手順で投入する。
+  # PostgreSQL の接続先は Secret から注入する。
   host: ${POSTGRES_HOST}
-  port: 5432
+  port: 5433
   user: ${POSTGRES_USER}
   password: >-
     ${POSTGRES_PASSWORD}
   database: ${POSTGRES_DB}
-  sslmode: require
+  # NAS 上の Docker PostgreSQL は TLS を有効化していない。
+  sslmode: disable
 
 mirakcs:
   - site: default
