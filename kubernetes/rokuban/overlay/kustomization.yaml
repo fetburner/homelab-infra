@@ -19,4 +19,4 @@ images:
   # NOTE: /api/media（#826）を含めるには FROM を main HEAD に bump したイメージへ
   # 差し替えが必要。ビルド後、この newTag を新しい sha に更新する。
   - name: ghcr.io/fetburner/rokuban-full
-    newTag: c7e420516d7051c914dfb777e2981b4ca52b5f05
+    newTag: 1579d386aee19466ae3aa380bf1a2c97efd8787c
