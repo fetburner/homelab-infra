@@ -6,6 +6,8 @@
 # analyze original MPEG-TS files directly. Versions are pinned to source commits.
 # Upstream: tobitti0/dtvindex, chapter_exe, logoframe; yobibi/join_logo_scp v5.1.1.
 FROM debian:bookworm-slim AS jls
+# curl | tar は pipefail が無いと curl の失敗が tar の失敗に化ける（hadolint DL4006）。
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
