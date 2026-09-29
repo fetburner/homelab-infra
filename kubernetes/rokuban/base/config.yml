@@ -48,12 +48,25 @@ encode:
         device: /dev/dri/renderD128
         output_format: vaapi
 
+# JLSE による CM 検出。worker（rokuban Deployment）が cm_detect キューを引く。
+# logoframe / chapter_exe / join_logo_scp は rokuban-full イメージに同梱されている
+# （Dockerfile/rokuban-full の jls ステージ）。起動時に 3 本 + ffprobe + ルール
+# ファイル（/usr/local/share/rokuban/cm_detect/JL_標準.txt）の存在を検査するので、
+# 公式の ffmpeg なしイメージにこの設定だけ載せると起動エラーになる。
+cm_detect:
+  enabled: true
+  binary_dir: /usr/local/bin
+  # 未完了分を拾い直す定期投入は CronJob（rokuban-enqueue-cm-detect-reconcile）が担う。
+
 storage:
   media_dir: /mnt/media
   scratch_dir: /var/tmp/rokuban
 
 ingest:
-  concurrency: 2
+  # mirakc サイトあたりの ingest 同時実行数。2 チューナー機の「2 本同時録画 +
+  # 全速 pull 1 本」で式の下端（docs/recording/ingest.md §5.4）。足りないと追従が
+  # 枠待ちになり、UI に取り込み待ちが続く。接続プールの予算は自動で追随する。
+  concurrency: 3
 
 epg:
   sync_interval: 10m
