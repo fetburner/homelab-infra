@@ -35,7 +35,7 @@ RUN set -eux; \
     install -m 0644 join_logo_scp/JL/JL_標準.txt /opt/jls/share/rokuban/cm_detect/JL_標準.txt; \
     test -s /opt/jls/share/rokuban/cm_detect/JL_標準.txt
 
-FROM ghcr.io/fetburner/rokuban:99c144423bbc5b7be68aac7b1e369e573e147d79
+FROM ghcr.io/fetburner/rokuban:1154cb293144edd2ed19f369549fcbf13a8b3903
 USER root
 ARG TARGETARCH
 # EPGStation と同じ Intel GPU を使えるよう、amd64 には VA-API（i965 / iHD）と
