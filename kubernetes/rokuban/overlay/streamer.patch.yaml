@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rokuban-streamer
+spec:
+  template:
+    spec:
+      # streamer はライブ視聴の VAAPI を使うので Intel GPU ノードに pin する。
+      nodeName: js50
+      securityContext:
+        supplementalGroups:
+          - 44
+          - 992
+      containers:
+        - name: streamer
+          volumeMounts:
+            - name: graphics-driver
+              mountPath: /dev/dri
+      volumes:
+        - name: graphics-driver
+          hostPath:
+            path: /dev/dri
+            type: Directory

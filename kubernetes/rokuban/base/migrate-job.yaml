@@ -1,0 +1,65 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rokuban-migrate
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: migrate
+  annotations:
+    # initContainer の migrate を外した代わりに、サーバー起動前に migrate を
+    # 走らせる順序保証を ArgoCD の PreSync で持つ。migrate は冪等なので
+    # 毎 sync 走って問題ない。失敗すれば sync ごと止まる（未 migrate の DB に
+    # server が乗るのを防ぐ）。
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 3
+  # 完走した Job を自分で片付ける。Job の spec は immutable なので、残っていると
+  # 同名の再 apply が落ちる。失敗した Job の証拠を残すため 1 時間。
+  ttlSecondsAfterFinished: 3600
+  # DDL がロック待ちで止まったまま失敗も完了もしないケースを 10 分で打ち切る。
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rokuban
+        app.kubernetes.io/component: migrate
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: dockerconfigjson-ghcr
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          image: ghcr.io/fetburner/rokuban-full:latest
+          imagePullPolicy: IfNotPresent
+          args: ["migrate", "up", "--config", "/etc/rokuban/config.yml"]
+          envFrom:
+            - secretRef:
+                name: rokuban-secrets
+          volumeMounts:
+            - name: config
+              mountPath: /etc/rokuban
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: rokuban-config

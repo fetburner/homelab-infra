@@ -1,0 +1,94 @@
+# watcher（site "default" ごとに 1 つ）。
+# mirakc の SSE を購読して ingest ジョブを投入するだけ。ffmpeg もアーカイブ書き込みも
+# 要らない（書くのは ingest の worker）。GPU 不要なので nodeName は付けない。
+#
+# replicas: 1 は正しさの要件ではなく「mirakc に N 本の SSE を張らない」配慮。
+# pg_try_advisory_lock（キー watcher:<site>）のリーダー選出があるので、2 レプリカでも
+# 負けた側は待機したまま mirakc に繋がない。RollingUpdate のまま（Recreate にしない）。
+#
+# PDB は無い。Service の後ろに居らず、落ちてもリーダー選出でフェイルオーバーする
+# （最大 15 秒 + jitter）。minAvailable: 1 を付けると replicas: 1 の既定で drain が
+# 永久にブロックする。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rokuban-watcher
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: watcher
+    app.kubernetes.io/part-of: rokuban
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rokuban
+      app.kubernetes.io/component: watcher
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rokuban
+        app.kubernetes.io/component: watcher
+        app.kubernetes.io/part-of: rokuban
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "40773"
+        prometheus.io/path: /metrics
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: dockerconfigjson-ghcr
+      # watcher は River クライアントを Start しない（insert 専用）ので drain の項は
+      # 乗らない。--soft-stop-timeout を argv に書くと起動エラーになる。
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: watcher
+          image: ghcr.io/fetburner/rokuban-full:latest
+          imagePullPolicy: IfNotPresent
+          args: ["server", "--roles", "watcher", "--sites", "default", "--config", "/etc/rokuban/config.yml"]
+          ports:
+            - name: http
+              containerPort: 40773
+          envFrom:
+            - secretRef:
+                name: rokuban-secrets
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          volumeMounts:
+            - name: config
+              mountPath: /etc/rokuban
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: rokuban-config

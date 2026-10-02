@@ -1,0 +1,68 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: rokuban-api
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: rokuban
+spec:
+  # maxUnavailable でなく minAvailable。maxUnavailable: 1 は replicas=1 のとき
+  # 「唯一の Pod を退去してよい」に化ける。
+  #
+  # ただし replicas: 1 では minAvailable: 1 は drain を永久にブロックする
+  # （許容 disruption = 健全数 - 1 = 0）。watcher.yaml が PDB を持たないのと
+  # 同じ理屈である。streamer / worker は元からこの状態で、api / notifier も
+  # 一旦 1 にしてあるので、drain の前に PDB を消すか `--disable-eviction` を
+  # 使うこと。なお NotReady taint による eviction は PDB を素通りするので、
+  # PDB は Pi のノード断に対しては防波堤にならない。
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rokuban
+      app.kubernetes.io/component: api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: rokuban-notifier
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: notifier
+    app.kubernetes.io/part-of: rokuban
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rokuban
+      app.kubernetes.io/component: notifier
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: rokuban-streamer
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: streamer
+    app.kubernetes.io/part-of: rokuban
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rokuban
+      app.kubernetes.io/component: streamer
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: rokuban-worker
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: rokuban
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rokuban
+      app.kubernetes.io/component: worker

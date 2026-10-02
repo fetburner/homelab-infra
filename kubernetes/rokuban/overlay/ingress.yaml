@@ -1,0 +1,62 @@
+# 単一ホスト名での role 別 path 振り分け（#811 の判定基準。PR #826 の /api/media）。
+#
+# 標準 Ingress の Exact / Prefix だけで backend が一意に決まる:
+#   /api/events                          → notifier（SSE）
+#   /api/media                           → streamer（VOD・サムネイル）
+#   /api/sites/default/networks          → streamer（ライブ HLS。site 名を具体化）
+#   /api/sites/default/recordings        → streamer（録画再生。参照実装の
+#                                          /api/media/recordings の site 束縛版）
+#   /（残り全部）                         → api（REST + SPA）
+#
+# site 束縛のパスは site 名ごとに Prefix を 1 本。単一サイト（default）なので 1 本。
+#
+# cloudflared（terraform/cloudflare/main.tf）は traefik（kube-system）に向いている。
+# 本 Ingress がそのまま効く。
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rokuban
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/part-of: rokuban
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: rokuban.fetburner.dev
+      http:
+        paths:
+          - path: /api/events
+            pathType: Exact
+            backend:
+              service:
+                name: rokuban-notifier
+                port:
+                  number: 40773
+          - path: /api/media
+            pathType: Prefix
+            backend:
+              service:
+                name: rokuban-streamer
+                port:
+                  number: 40773
+          - path: /api/sites/default/networks
+            pathType: Prefix
+            backend:
+              service:
+                name: rokuban-streamer
+                port:
+                  number: 40773
+          - path: /api/sites/default/recordings
+            pathType: Prefix
+            backend:
+              service:
+                name: rokuban-streamer
+                port:
+                  number: 40773
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rokuban-api
+                port:
+                  number: 40773
