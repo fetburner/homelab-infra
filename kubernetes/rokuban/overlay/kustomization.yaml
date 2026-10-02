@@ -12,16 +12,12 @@ patches:
   - path: streamer.patch.yaml
 
 images:
-  # Dockerfile/rokuban-full の FROM を bump した commit の sha を差す。
-  # タグは rokuban 側ではなく homelab-infra 側の commit sha（CI の
-  # docker-image.yml が github.sha で push するため）。
-  #
-  # NOTE: /api/media（#826）を含めるには FROM を main HEAD に bump したイメージへ
-  # 差し替えが必要。ビルド後、この newTag を新しい sha に更新する。
+  # タグには Dockerfile/rokuban-full の FROM 更新をビルドした
+  # homelab-infra commit sha を指定する（CI が github.sha で push）。
   #
   # 各 manifest の imagePullPolicy は IfNotPresent。ここで差すタグが commit sha で
   # 不変なので、ノードに一度載れば以降はレジストリに一切触らない（CronJob が
   # 毎分 Pod を作るため、Always だと 1 日 1440 回 ghcr.io を引きに行っていた）。
   # 結果として ghcr.io の rate limit も、Pi 側の DNS の一時失敗も踏まなくなる。
   - name: ghcr.io/fetburner/rokuban-full
-    newTag: 6fc9a181613eff05b65be327c6b6caa947874add
+    newTag: b549d7aa7d35b693fe6c8e62f6b7a8f15fae55f6
