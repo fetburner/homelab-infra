@@ -20,4 +20,4 @@ images:
   # 毎分 Pod を作るため、Always だと 1 日 1440 回 ghcr.io を引きに行っていた）。
   # 結果として ghcr.io の rate limit も、Pi 側の DNS の一時失敗も踏まなくなる。
   - name: ghcr.io/fetburner/rokuban-full
-    newTag: 6f934e9fb4146ec02ca8705c631e4afa05c4c9c8
+    newTag: f0256e8d32ecedcd404a5080a31dc619a500f37b
