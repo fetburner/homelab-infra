@@ -47,6 +47,22 @@ encode:
         kind: vaapi
         device: /dev/dri/renderD128
         output_format: vaapi
+    # CM カット版。確認・保存済みのチャプターにある cut=true 区間を除去する。
+    # Rokuban upstream の cut 対応により、CM カット中も VAAPI の HW デコード /
+    # デインターレース / スケーリング / エンコードを使う。
+    - name: h264_vaapi_cmcut
+      container: mp4
+      video_codec: h264_vaapi
+      audio_codec: aac
+      height: 1080
+      scaler: vaapi
+      deinterlace: true
+      qp: 24
+      hwaccel:
+        kind: vaapi
+        device: /dev/dri/renderD128
+        output_format: vaapi
+      cut: true
 
 # JLSE による CM 検出。worker（rokuban Deployment）が cm_detect キューを引く。
 # logoframe / chapter_exe / join_logo_scp は rokuban-full イメージに同梱されている
