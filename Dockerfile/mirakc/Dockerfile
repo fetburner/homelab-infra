@@ -1,7 +1,7 @@
 # mirakc-arib, mirakc
 FROM rust:1.98.1-trixie AS mirakc-build
 
-ARG MIRAKC_REF=worktree-issue-9-sha256-inline
+ARG MIRAKC_REF=main
 RUN git clone --depth=1 --branch "$MIRAKC_REF" https://github.com/fetburner/mirakc.git /src
 
 WORKDIR /src
