@@ -1,11 +1,15 @@
-# rokuban 側 Dockerfile.full（99c1444 時点）の jls ステージをそのまま持ってきている。
-# Dockerfile.full は「セルフビルド例」で ghcr に publish されないため、うちの
-# rokuban-full が唯一の ffmpeg 入りイメージになる。上流の差分はここへ手で反映する。
+# rokuban 側 Dockerfile.full の推奨構成を homelab 向けに反映する。
+# Dockerfile.full は「セルフビルド例」で ghcr に publish されないため、ここでは
+# upstream の Trixie / FFmpeg 7.1 系 / JLSE runtime library を使い、Intel GPU driver
+# と QSV runtime を追加した rokuban-full を作る。上流の変更はここへ手で反映する。
 #
 # JLSE command-line tools are built without the AviSynth wrapper so workers can
 # analyze original MPEG-TS files directly. Versions are pinned to source commits.
 # Upstream: tobitti0/dtvindex, chapter_exe, logoframe; yobibi/join_logo_scp v5.1.1.
-FROM debian:bookworm-slim AS jls
+# FFmpeg 7.1 以降は VA-API のカット処理で推奨される。Trixie の ffmpeg は 7.1.5。
+# JLSE を Trixie の libav* にリンクし、runtime 側も同じ soname のライブラリを入れる。
+ARG BASE=ghcr.io/fetburner/rokuban:3a2a55b77478cda9079cfda7d8eea37af3780542
+FROM debian:trixie-slim AS jls
 # curl | tar は pipefail が無いと curl の失敗が tar の失敗に化ける（hadolint DL4006）。
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -35,7 +39,7 @@ RUN set -eux; \
     install -m 0644 join_logo_scp/JL/JL_標準.txt /opt/jls/share/rokuban/cm_detect/JL_標準.txt; \
     test -s /opt/jls/share/rokuban/cm_detect/JL_標準.txt
 
-FROM ghcr.io/fetburner/rokuban:438c162e89f0b79d1fa734de767724fa18f925c8
+FROM ${BASE}
 USER root
 ARG TARGETARCH
 # EPGStation と同じ Intel GPU を使えるよう、amd64 には VA-API（i965 / iHD）と
@@ -50,15 +54,18 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         apt-get update && \
         apt-get install -y --no-install-recommends \
           ffmpeg \
+          libavformat61 libavcodec61 libavutil59 libswscale8 libswresample5 \
           i965-va-driver \
           intel-media-va-driver-non-free \
           libmfx-gen1.2 ;; \
       *) \
         apt-get update && \
-        apt-get install -y --no-install-recommends ffmpeg ;; \
+        apt-get install -y --no-install-recommends \
+          ffmpeg \
+          libavformat61 libavcodec61 libavutil59 libswscale8 libswresample5 ;; \
     esac
-# JLSE ツールは jls ステージで bookworm の libav*-dev にリンクしている。
-# ランタイムの libavformat59 等は上の ffmpeg の依存として入る。
+# JLSE ツールは jls ステージで trixie の libav*-dev にリンクしている。
+# 対応する runtime libav* は ffmpeg とは別に明示しているため、ffmpeg を差し替えても JLS は動く。
 # 配置先は config.yml の cm_detect.binary_dir と
 # config.CMDetectRulePath（/usr/local/share/rokuban/cm_detect/JL_標準.txt）に一致させる。
 COPY --from=jls /opt/jls/bin/ /usr/local/bin/
