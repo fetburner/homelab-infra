@@ -1,7 +1,7 @@
 # mirakc-arib, mirakc
 FROM rust:1.99.0-trixie AS mirakc-build
 
-ARG MIRAKC_REF=main
+ARG MIRAKC_REF=recording-follow-with-watch
 RUN git clone --depth=1 --branch "$MIRAKC_REF" https://github.com/fetburner/mirakc.git /src
 
 WORKDIR /src
