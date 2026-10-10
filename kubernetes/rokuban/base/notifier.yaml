@@ -1,9 +1,10 @@
 # notifier ロール。Postgres の NOTIFY を購読してブラウザへ SSE (/api/events) を配る。
 # mirakc にもファイルシステムにも触らない。参照実装 deploy/k8s/base/notifier.yaml 移植。
+# resident River client を兼ね、全 worker を登録したうえで共有 DB の ruler queue を購読する。
 #
-# **参照実装は replicas: 2（各レプリカが自分で LISTEN するだけで調停が無い役）だが、
-# homelab は一旦 1。** 1 なので再起動で SSE が全断する（クライアントは再接続する）。
-# 副作用は pdb.yaml のコメントを参照（PDB は minAvailable: 1 のままで drain がブロックする）。
+# River の保守サービスは leader 1 つに絞られ、ジョブ実行は行ロックで調停されるため、
+# notifier を複数 replica にしても resident client を載せられる。homelab は 1 replica。
+# 再起動時は SSE が全断するが、クライアントは再接続する。PDB は minAvailable: 1 のまま。
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,7 +34,7 @@ spec:
       automountServiceAccountToken: false
       imagePullSecrets:
         - name: dockerconfigjson-ghcr
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 40
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -52,7 +53,7 @@ spec:
         - name: notifier
           image: ghcr.io/fetburner/rokuban-full:latest
           imagePullPolicy: IfNotPresent
-          args: ["server", "--roles", "notifier", "--sites=", "--config", "/etc/rokuban/config.yml"]
+          args: ["server", "--roles", "notifier,worker", "--queues", "ruler", "--sites=", "--config", "/etc/rokuban/config.yml"]
           ports:
             - name: http
               containerPort: 40773
