@@ -95,7 +95,7 @@ spec:
             type: Directory
         - name: config
           configMap:
-            name: rokuban-config
+            name: rokuban-recording-hls-config
         - name: media
           persistentVolumeClaim:
             claimName: rokuban-media
