@@ -1,0 +1,122 @@
+# 世代付き録画 HLS を配信する専用 streamer。
+# 録画ごとの変換状態とセグメントキャッシュはプロセス内にあるため replicas は 1。
+# 増やすときは録画 id で consistent hash する Ingress/controller が必要になる。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rokuban-recording-hls
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: recording-hls
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rokuban
+      app.kubernetes.io/component: recording-hls
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rokuban
+        app.kubernetes.io/component: recording-hls
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "40773"
+        prometheus.io/path: /metrics
+    spec:
+      nodeName: js50
+      imagePullSecrets:
+        - name: dockerconfigjson-ghcr
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [44, 992]
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: recording-hls
+          image: ghcr.io/fetburner/rokuban-full:latest
+          args: ["server", "--roles", "streamer", "--sites=", "--config", "/etc/rokuban/config.yml"]
+          ports:
+            - name: http
+              containerPort: 40773
+          envFrom:
+            - secretRef:
+                name: rokuban-secrets
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "5"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/rokuban
+              readOnly: true
+            - name: media
+              mountPath: /mnt/media
+              readOnly: true
+            - name: graphics-driver
+              mountPath: /dev/dri
+            - name: recording-hls-scratch
+              mountPath: /dev/shm
+          securityContext:
+            privileged: true
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1536Mi
+      volumes:
+        - name: graphics-driver
+          hostPath:
+            path: /dev/dri
+            type: Directory
+        - name: config
+          configMap:
+            name: rokuban-config
+        - name: media
+          persistentVolumeClaim:
+            claimName: rokuban-media
+        - name: recording-hls-scratch
+          emptyDir:
+            medium: Memory
+            sizeLimit: 640Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rokuban-recording-hls
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: recording-hls
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: recording-hls
+  ports:
+    - name: http
+      port: 40773
+      targetPort: http

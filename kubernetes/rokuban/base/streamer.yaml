@@ -45,7 +45,7 @@ spec:
           image: ghcr.io/fetburner/rokuban-full:latest
           imagePullPolicy: IfNotPresent
           # live を載せるので site 束縛（--sites default）。空だと起動しない。
-          args: ["server", "--roles", "streamer", "--sites", "default", "--config", "/etc/rokuban/config.yml"]
+          args: ["server", "--roles", "streamer", "--sites", "default", "--no-recording-hls", "--config", "/etc/rokuban/config.yml"]
           ports:
             - name: http
               containerPort: 40773

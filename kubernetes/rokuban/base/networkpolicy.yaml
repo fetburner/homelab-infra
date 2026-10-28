@@ -42,7 +42,7 @@ spec:
         values: [rokuban]
       - key: app.kubernetes.io/component
         operator: In
-        values: [api, notifier, streamer, worker, watcher]
+        values: [api, notifier, streamer, recording-hls, worker, watcher]
   policyTypes:
     - Ingress
     - Egress

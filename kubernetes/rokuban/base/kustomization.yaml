@@ -5,6 +5,7 @@ resources:
   - api.yaml
   - notifier.yaml
   - streamer.yaml
+  - recording-hls.yaml
   - watcher.yaml
   - deployment.yaml
   - migrate-job.yaml

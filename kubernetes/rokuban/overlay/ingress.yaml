@@ -32,6 +32,13 @@ spec:
                 name: rokuban-notifier
                 port:
                   number: 40773
+          - path: /api/media/stores/main
+            pathType: Prefix
+            backend:
+              service:
+                name: rokuban-recording-hls
+                port:
+                  number: 40773
           - path: /api/media
             pathType: Prefix
             backend:

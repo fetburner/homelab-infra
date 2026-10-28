@@ -75,8 +75,20 @@ cm_detect:
   # 未完了分を拾い直す定期投入は CronJob（rokuban-enqueue-cm-detect-reconcile）が担う。
 
 storage:
+  stores:
+    main: { kind: fs }
+  originals:
+    - store: main
+  derived: main
   media_dir: /mnt/media
   scratch_dir: /var/tmp/rokuban
+
+recording_hls:
+  enabled: true
+  segment_dir: /dev/shm/rokuban-recording-hls
+  max_concurrent: 1
+  cache_bytes: 536870912
+  wait_timeout: 30s
 
 ingest:
   # mirakc サイトあたりの ingest 同時実行数。2 チューナー機の「2 本同時録画 +
