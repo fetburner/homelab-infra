@@ -19,7 +19,3 @@ configMapGenerator:
   - name: rokuban-config
     files:
       - config.yml
-
-  - name: rokuban-recording-hls-config
-    files:
-      - config.yml=recording-hls-config.yml
