@@ -8,7 +8,7 @@
 # Upstream: tobitti0/dtvindex, chapter_exe, logoframe; yobibi/join_logo_scp v5.1.1.
 # FFmpeg 7.1 以降は VA-API のカット処理で推奨される。Trixie の ffmpeg は 7.1.5。
 # JLSE を Trixie の libav* にリンクし、runtime 側も同じ soname のライブラリを入れる。
-ARG BASE=ghcr.io/fetburner/rokuban:277451b366a98bf6e5314eaa9faecdcff9e624f5
+ARG BASE=ghcr.io/fetburner/rokuban:1a66807b6665a0af68018791c5fbc91f91438aec
 FROM debian:trixie-slim AS jls
 # curl | tar は pipefail が無いと curl の失敗が tar の失敗に化ける（hadolint DL4006）。
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
