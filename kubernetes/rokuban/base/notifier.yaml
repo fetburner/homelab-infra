@@ -53,7 +53,7 @@ spec:
         - name: notifier
           image: ghcr.io/fetburner/rokuban-full:latest
           imagePullPolicy: IfNotPresent
-          args: ["server", "--roles", "notifier,worker", "--queues", "ruler", "--sites=", "--config", "/etc/rokuban/config.yml"]
+          args: ["server", "--roles", "notifier,worker", "--queues", "ruler", "--sites=", "--stores=", "--config", "/etc/rokuban/config.yml"]
           ports:
             - name: http
               containerPort: 40773

@@ -804,3 +804,67 @@ spec:
             - name: config
               configMap:
                 name: rokuban-config
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rokuban-enqueue-storage-transfer-reconcile
+  labels:
+    app.kubernetes.io/name: rokuban
+    app.kubernetes.io/component: enqueue
+spec:
+  # 分類ルールの再評価（#890）。site 非依存。**これが無いと、ルールを編集した
+  # 時点で既にコミット済みの録画が旧ルールで評価された当たりを持ったまま残る。**
+  # 転送の投入。置き場の観測（storage-sync）と同じ 5 分間隔（rokuban の deploy/k8s/base/cronjobs.yaml に合わせる）。
+  schedule: "*/5 * * * *"
+  startingDeadlineSeconds: 600
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: rokuban
+            app.kubernetes.io/component: enqueue
+        spec:
+          restartPolicy: Never
+          enableServiceLinks: false
+          automountServiceAccountToken: false
+          imagePullSecrets:
+            - name: dockerconfigjson-ghcr
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: enqueue
+              image: ghcr.io/fetburner/rokuban-full:latest
+              imagePullPolicy: IfNotPresent
+              args: ["enqueue", "storage-transfer-reconcile", "--config", "/etc/rokuban/config.yml"]
+              envFrom:
+                - secretRef:
+                    name: rokuban-secrets
+              volumeMounts:
+                - name: config
+                  mountPath: /etc/rokuban
+                  readOnly: true
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 20m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+          volumes:
+            - name: config
+              configMap:
+                name: rokuban-config
