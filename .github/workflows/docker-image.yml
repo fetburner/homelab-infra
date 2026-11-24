@@ -80,6 +80,10 @@ jobs:
         with:
           submodules: true
 
+      # arm64 ランナー上で amd64 専用のベースイメージ (prom/snmp-generator) を実行するために必要
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
       - name: Set up Docker Buildx
         id: setup-buildx
         uses: docker/setup-buildx-action@v4
